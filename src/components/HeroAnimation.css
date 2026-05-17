@@ -1,0 +1,114 @@
+.hero-pin-container {
+  position: relative;
+  width: 100%;
+}
+
+.hero-animation-scene {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1200px;
+}
+
+.anim-card-wrapper {
+  position: absolute;
+  width: 540px; /* Reduced by ~15-20% for better balance */
+  border-radius: 16px;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.7);
+}
+
+.anim-card-base {
+  width: 100%;
+  display: block;
+  border-radius: 16px;
+}
+
+.anim-card-enhanced {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+  border-radius: 16px;
+  /* Enhanced effects: physically correct zoom scaling, sharp, bright */
+  filter: brightness(1.4) contrast(1.25) saturate(1.1) drop-shadow(0 0 20px rgba(200, 169, 110, 0.6));
+  transform: scale(1.15);
+  /* clip-path and transform-origin are applied dynamically in JS! */
+}
+
+.anim-card-enhanced img {
+  width: 100%;
+  display: block;
+  border-radius: 16px;
+}
+
+/* Scanline inside the lens */
+.scanline {
+  position: absolute;
+  top: -50%;
+  left: 0;
+  width: 100%;
+  height: 200%;
+  /* Thin bright center with soft fading edges */
+  background: linear-gradient(to bottom, transparent 40%, rgba(200, 169, 110, 0.1) 49%, rgba(220, 180, 100, 1) 50%, rgba(200, 169, 110, 0.1) 51%, transparent 60%);
+  animation: scan 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes scan {
+  0% { transform: translateY(-50%); }
+  100% { transform: translateY(50%); }
+}
+
+.anim-glass-gsap-wrapper {
+  position: absolute;
+  width: 260px; /* Reduced by ~30% for elegance */
+  z-index: 3;
+  pointer-events: none;
+}
+
+.anim-glass-container {
+  width: 100%;
+  filter: drop-shadow(0 40px 50px rgba(0,0,0,0.7));
+}
+
+.anim-glass {
+  width: 100%;
+  height: auto;
+}
+
+/* Ensure right side of landing hero has space */
+.hero-wrap.container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hero-content {
+  flex: 1;
+  max-width: 500px;
+}
+
+.hero-animation-wrapper {
+  flex: 1;
+  max-width: 700px;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 992px) {
+  .hero-wrap.container {
+    flex-direction: column;
+  }
+  .hero-animation-wrapper {
+    margin-top: 60px;
+    width: 100%;
+  }
+}

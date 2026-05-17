@@ -1,20 +1,28 @@
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 export default function Navbar({ type = "public", stepText, backTo }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 30);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav className="nav">
+    <nav className={`nav ${scrolled ? 'scrolled' : ''}`}>
       <span className="nav-logo" onClick={() => navigate('/')}>Veritas</span>
       
       {type === "public" && (
         <>
-          <div className="nav-links">
+          {/* <div className="nav-links">
             <span className="nav-link">Features</span>
             <span className="nav-link">Security</span>
             <span className="nav-link">Docs</span>
-          </div>
+          </div> */}
           <div className="nav-actions">
             <button className="btn btn-ghost" onClick={() => navigate('/login')}>Sign in</button>
             <button className="btn btn-gold" onClick={() => navigate('/register')}>Get Started</button>
