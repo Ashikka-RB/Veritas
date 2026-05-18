@@ -12,13 +12,117 @@ const extractAadhaarData = async (req, res) => {
     );
 
     const extractedText = result.data.text;
+        // Extract Aadhaar Number
+    const aadhaarMatch =
+  extractedText.match(
+    /\d{4}\s?\d{4}\s?\d{4}/
+  );
+
+    let aadhaarNumber = "Not Found";
+
+if (aadhaarMatch) {
+
+  // remove spaces
+  const cleanNumber =
+    aadhaarMatch[0]
+      .replace(/\s/g, "");
+
+  // format again
+  aadhaarNumber =
+    cleanNumber.replace(
+      /(\d{4})(\d{4})(\d{4})/,
+      "$1 $2 $3"
+    );
+
+}
+
+    // Extract DOB
+    const dobMatch =
+      extractedText.match(
+        /\d{2}\/\d{2}\/\d{4}/
+      );
+
+    const dob =
+      dobMatch
+        ? dobMatch[0]
+        : "Not Found";
+
+    // Extract Gender
+    let gender = "Not Found";
+
+    if (
+      extractedText.includes("MALE")
+    ) {
+      gender = "MALE";
+    }
+
+    if (
+      extractedText.includes("FEMALE")
+    ) {
+      gender = "FEMALE";
+    }
+
+    // Extract Name
+    const lines =
+      extractedText
+        .split("\n")
+        .map(line => line.trim())
+        .filter(line => line !== "");
+
+    let name = "Not Found";
+
+    for (let line of lines) {
+
+  const cleanLine =
+  line
+    .replace(/[^A-Za-z\s]/g, "")
+    .trim();
+
+    const finalLine =
+  cleanLine
+    .replace(/^Name\s*/i, "")
+    .trim();
+
+const upperLine =
+  cleanLine.toUpperCase();
+
+  if (
+
+    cleanLine.length > 5 &&
+
+    !upperLine.includes("GOVERNMENT") &&
+    !upperLine.includes("INDIA") &&
+    !upperLine.includes("AUTHORITY") &&
+    !upperLine.includes("AADHAAR") &&
+    !upperLine.includes("DOB") &&
+    !upperLine.includes("MALE") &&
+    !upperLine.includes("FEMALE")&&
+
+    !cleanLine.match(/\d/)
+
+  ) {
+
+    name = finalLine;
+    break;
+
+  }
+
+}
 
     console.log(extractedText);
 
     res.status(200).json({
-      message: "OCR Extraction Success",
-      text: extractedText
-    });
+  message: "OCR Extraction Success",
+
+  extractedData: {
+    name,
+    dob,
+    gender,
+    aadhaarNumber
+  },
+
+  rawText: extractedText
+});
 
   } catch (error) {
 

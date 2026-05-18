@@ -37,11 +37,45 @@ export default function AadhaarUpload() {
 
     if (response.ok) {
 
-      setUploaded(true);
+  setUploaded(true);
 
-      setFile(selectedFile);
+  setFile(selectedFile);
 
-    } else {
+  // OCR API call
+  const ocrFormData = new FormData();
+
+  ocrFormData.append(
+    "aadhaar",
+    selectedFile
+  );
+
+  const ocrResponse = await fetch(
+    "http://localhost:8000/api/ocr/aadhaar",
+    {
+      method: "POST",
+      body: ocrFormData
+    }
+  );
+
+  const ocrData =
+    await ocrResponse.json();
+
+  console.log(ocrData);
+
+  // store OCR data
+  localStorage.setItem(
+    "ocrData",
+    JSON.stringify(
+      ocrData.extractedData
+    )
+  );
+
+  // navigate after OCR
+  setTimeout(() => {
+    navigate('/verify/ocr');
+  }, 2000);
+
+} else {
 
       alert(data.message);
 
