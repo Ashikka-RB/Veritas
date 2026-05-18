@@ -3,6 +3,7 @@ const cors = require("cors");
 const path = require("path");
 
 const uploadRoutes = require("./routes/uploadRoutes");
+const ocrRoutes = require("./routes/ocrRoutes");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
@@ -25,6 +26,7 @@ connectDB();
 
 app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/ocr", ocrRoutes);
 
 app.get("/", (req, res) => {
   res.json({
