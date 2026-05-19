@@ -6,9 +6,54 @@ export default function PanUpload() {
   const navigate = useNavigate();
   const [uploaded, setUploaded] = useState(false);
 
-  const simulatePAN = () => {
-    setUploaded(true);
-  };
+const handlePanUpload =
+  async (selectedFile) => {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const formData =
+        new FormData();
+
+      formData.append(
+        "pan",
+        selectedFile
+      );
+
+      // upload PAN
+      const response =
+        await fetch(
+
+          "http://localhost:8000/api/upload/pan",
+
+          {
+            method: "POST",
+
+            headers: {
+              Authorization:
+                `Bearer ${token}`
+            },
+
+            body: formData
+          }
+
+        );
+
+      if (response.ok) {
+
+        setUploaded(true);
+
+      }
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+};
 
   return (
     <div className="page active" id="p-pan">
@@ -25,11 +70,71 @@ export default function PanUpload() {
           <div style={{ fontSize: '11px', color: 'var(--text3)', marginTop: '4px' }}>PAN name must match this exactly</div>
         </div>
 
-        <div className="upload-zone" onClick={simulatePAN} style={uploaded ? { borderColor: 'rgba(200,169,110,0.4)', background: 'var(--bg2)' } : {}}>
-          <i className="ti ti-credit-card"></i>
-          <div style={{ fontSize: '14px', color: 'var(--text2)', marginBottom: '4px' }}>{uploaded ? 'Uploaded successfully' : 'Upload PAN card image'}</div>
-          <div style={{ fontSize: '12px', color: 'var(--text3)' }}>{uploaded ? 'pan_card.jpg' : 'JPG, PNG · Max 3 MB'}</div>
-        </div>
+        <label
+  className="upload-zone"
+  style={
+    uploaded
+      ? {
+          borderColor:
+            'rgba(200,169,110,0.4)',
+          background:
+            'var(--bg2)'
+        }
+      : {}
+  }
+>
+
+  <i className="ti ti-credit-card"></i>
+
+  <div
+    style={{
+      fontSize: '14px',
+      color: 'var(--text2)',
+      marginBottom: '4px'
+    }}
+  >
+    {
+      uploaded
+        ? 'Uploaded successfully'
+        : 'Upload PAN card image'
+    }
+  </div>
+
+  <div
+    style={{
+      fontSize: '12px',
+      color: 'var(--text3)'
+    }}
+  >
+    {
+      uploaded
+        ? 'pan_card.jpg'
+        : 'JPG, PNG · Max 3 MB'
+    }
+  </div>
+
+  <input
+    type="file"
+    hidden
+    accept=".jpg,.jpeg,.png"
+
+    onChange={(e) => {
+
+      const selectedFile =
+        e.target.files[0];
+
+      if (selectedFile) {
+
+        handlePanUpload(
+          selectedFile
+        );
+
+      }
+
+    }}
+  />
+
+</label>
 
         {uploaded && (
           <div id="pan-result" style={{ marginTop: '16px' }}>

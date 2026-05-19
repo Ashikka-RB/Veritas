@@ -136,6 +136,132 @@ const upperLine =
 
 };
 
+const extractPanData =
+  async (req, res) => {
+
+    try {
+
+      const imagePath =
+        req.file.path;
+
+      const result =
+        await Tesseract.recognize(
+          imagePath,
+          "eng"
+        );
+
+      const extractedText =
+        result.data.text;
+
+      // Extract PAN Number
+      const panMatch =
+        extractedText.match(
+          /[A-Z]{5}[0-9]{4}[A-Z]{1}/
+        );
+
+      const panNumber =
+        panMatch
+          ? panMatch[0]
+          : "Not Found";
+
+      // Extract DOB
+      const dobMatch =
+        extractedText.match(
+          /\d{2}\/\d{2}\/\d{4}/
+        );
+
+      const dob =
+        dobMatch
+          ? dobMatch[0]
+          : "Not Found";
+
+      // Extract Name
+        const lines =
+  extractedText
+    .split("\n")
+    .map(line => line.trim())
+    .filter(line => line !== "");
+
+let name = "Not Found";
+
+for (let i = 0; i < lines.length; i++) {
+
+  const currentLine =
+    lines[i].toUpperCase();
+
+  // detect "NAME"
+  if (
+    currentLine.includes("NAME")
+  ) {
+
+    // next line usually contains actual name
+    const nextLine =
+      lines[i + 1];
+
+    if (nextLine) {
+
+      const cleanName =
+  nextLine
+    .replace(
+      /[^A-Za-z\s]/g,
+      ""
+    )
+    .replace(
+      /\b[a-zA-Z]{1,2}\b/g,
+      ""
+    )
+    .replace(
+      /\s+/g,
+      " "
+    )
+    .trim();
+
+      if (
+        cleanName.length > 5
+      ) {
+
+        name = cleanName;
+
+        break;
+
+      }
+
+    }
+
+  }
+
+}
+
+      res.status(200).json({
+
+        message:
+          "PAN OCR Success",
+
+        extractedData: {
+          name,
+          dob,
+          panNumber
+        },
+
+        rawText:
+          extractedText
+
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+      res.status(500).json({
+        message:
+          "PAN OCR Failed"
+      });
+
+    }
+
+};
+
 module.exports = {
-  extractAadhaarData
+  extractAadhaarData,
+  extractPanData
 };

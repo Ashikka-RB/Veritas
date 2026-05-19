@@ -7,7 +7,8 @@ const upload = require("../config/multer");
 const authMiddleware = require("../middleware/authMiddleware");
 
 const {
-  uploadAadhaar
+  uploadAadhaar,
+  uploadPan
 } = require("../controllers/uploadController");
 
 router.post(
@@ -15,6 +16,13 @@ router.post(
   authMiddleware,
   upload.single("aadhaar"),
   uploadAadhaar
+);
+
+router.post(
+  "/pan",
+  authMiddleware,
+  upload.single("pan"),
+  uploadPan
 );
 
 module.exports = router;

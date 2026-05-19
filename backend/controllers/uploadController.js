@@ -38,6 +38,47 @@ const uploadAadhaar = async (req, res) => {
 
 };
 
+const uploadPan = async (req, res) => {
+
+  try {
+
+    const userId = req.user.id;
+
+    const filePath = req.file.path;
+
+    const updatedUser =
+      await User.findByIdAndUpdate(
+
+        userId,
+
+        {
+          panFile: filePath
+        },
+
+        {
+          new: true
+        }
+
+      );
+
+    res.status(200).json({
+      message: "PAN uploaded successfully",
+      user: updatedUser
+    });
+
+  } catch (error) {
+
+    console.log(error);
+
+    res.status(500).json({
+      message: "Server Error"
+    });
+
+  }
+
+};
+
 module.exports = {
-  uploadAadhaar
+  uploadAadhaar,
+  uploadPan
 };
