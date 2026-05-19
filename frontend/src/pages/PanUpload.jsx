@@ -5,6 +5,8 @@ import Navbar from '../components/Navbar';
 export default function PanUpload() {
   const navigate = useNavigate();
   const [uploaded, setUploaded] = useState(false);
+  const [panData, setPanData] = useState(null);
+  const aadhaarData = JSON.parse(localStorage.getItem("ocrData"));
 
 const handlePanUpload =
   async (selectedFile) => {
@@ -23,29 +25,46 @@ const handlePanUpload =
       );
 
       // upload PAN
-      const response =
+      await fetch(
+
+        "http://localhost:8000/api/upload/pan",
+
+        {
+          method: "POST",
+
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          },
+
+          body: formData
+        }
+
+      );
+
+      // OCR request
+      const ocrResponse =
         await fetch(
 
-          "http://localhost:8000/api/upload/pan",
+          "http://localhost:8000/api/ocr/pan",
 
           {
             method: "POST",
-
-            headers: {
-              Authorization:
-                `Bearer ${token}`
-            },
-
             body: formData
           }
 
         );
 
-      if (response.ok) {
+      const ocrData =
+        await ocrResponse.json();
 
-        setUploaded(true);
+      console.log(ocrData);
 
-      }
+      setPanData(
+        ocrData.extractedData
+      );
+
+      setUploaded(true);
 
     } catch (error) {
 
@@ -66,7 +85,7 @@ const handlePanUpload =
         </div>
         <div className="card" style={{ marginBottom: '16px', background: 'var(--bg3)' }}>
           <div style={{ fontSize: '12px', color: 'var(--text3)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Aadhaar Name (Reference)</div>
-          <div style={{ fontSize: '15px', fontWeight: 500, color: 'var(--gold)', fontFamily: 'var(--mono)' }}>PRIYA KRISHNAMURTHY</div>
+          <div style={{ fontSize: '15px', fontWeight: 500, color: 'var(--gold)', fontFamily: 'var(--mono)' }}>{aadhaarData?.name}</div>
           <div style={{ fontSize: '11px', color: 'var(--text3)', marginTop: '4px' }}>PAN name must match this exactly</div>
         </div>
 
@@ -141,9 +160,26 @@ const handlePanUpload =
             <div className="card" style={{ background: 'var(--bg3)' }}>
               <div style={{ fontSize: '13px', fontWeight: 500, marginBottom: '12px', color: 'var(--gold)' }}><i className="ti ti-sparkles"></i> PAN Extracted</div>
               <div style={{ background: 'var(--bg2)', borderRadius: 'var(--r)', overflow: 'hidden' }}>
-                <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">PAN Number</span><span className="ocr-val">ABCPK1234D</span></div>
-                <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">PAN Name</span><span className="ocr-val">PRIYA KRISHNAMURTHY</span></div>
-                <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Name Match</span><span className="badge badge-green">✓ Names Match</span></div>
+                <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">PAN Number</span><span className="ocr-val">{panData?.panNumber}</span></div>
+                <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">PAN Name</span><span className="ocr-val">{panData?.name}</span></div>
+                <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Name Match</span>{
+  panData?.name ===
+  "RAJESH KUMAR SHARMA"
+
+  ? (
+
+    <span className="badge badge-green">
+      ✓ Names Match
+    </span>
+
+  ) : (
+
+    <span className="badge badge-amber">
+      ⚠ Name Mismatch
+    </span>
+
+  )
+}</div>
               </div>
             </div>
           </div>
