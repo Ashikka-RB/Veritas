@@ -38,7 +38,37 @@ panFile: {
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+
+  aadhaarName: {
+  type: String
+},
+
+aadhaarDOB: {
+  type: String
+},
+
+aadhaarGender: {
+  type: String
+},
+
+aadhaarNumber: {
+  type: String
+},
+
+panName: {
+  type: String
+},
+
+panDOB: {
+  type: String
+},
+
+panNumber: {
+  type: String
+},
 });
+
+
 
 module.exports = mongoose.model("User", userSchema);

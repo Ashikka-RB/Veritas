@@ -1,3 +1,5 @@
+const authMiddleware = require("../middleware/authMiddleware");
+
 const express = require("express");
 
 const router = express.Router();
@@ -11,12 +13,14 @@ const {
 
 router.post(
   "/aadhaar",
+  authMiddleware,
   upload.single("aadhaar"),
   extractAadhaarData
 );
 
 router.post(
   "/pan",
+  authMiddleware,
   upload.single("pan"),
   extractPanData
 );

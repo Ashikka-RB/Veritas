@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
@@ -6,7 +6,56 @@ export default function PanUpload() {
   const navigate = useNavigate();
   const [uploaded, setUploaded] = useState(false);
   const [panData, setPanData] = useState(null);
-  const aadhaarData = JSON.parse(localStorage.getItem("ocrData"));
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+
+  const fetchProfile =
+    async () => {
+
+      try {
+
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+
+        const response =
+          await fetch(
+
+            "http://localhost:8000/api/auth/profile",
+
+            {
+
+              headers: {
+
+                Authorization:
+                  `Bearer ${token}`
+
+              }
+
+            }
+
+          );
+
+        const data =
+          await response.json();
+
+        console.log(data);
+
+        setUserData(data);
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+    };
+
+  fetchProfile();
+
+}, []);
 
 const handlePanUpload =
   async (selectedFile) => {
@@ -44,16 +93,17 @@ const handlePanUpload =
 
       // OCR request
       const ocrResponse =
-        await fetch(
-
-          "http://localhost:8000/api/ocr/pan",
-
-          {
-            method: "POST",
-            body: formData
-          }
-
-        );
+  await fetch(
+    "http://localhost:8000/api/ocr/pan",
+    {
+      method: "POST",
+      headers: {
+        Authorization:
+          `Bearer ${token}`
+      },
+      body: formData
+    }
+  );
 
       const ocrData =
         await ocrResponse.json();
@@ -85,7 +135,7 @@ const handlePanUpload =
         </div>
         <div className="card" style={{ marginBottom: '16px', background: 'var(--bg3)' }}>
           <div style={{ fontSize: '12px', color: 'var(--text3)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Aadhaar Name (Reference)</div>
-          <div style={{ fontSize: '15px', fontWeight: 500, color: 'var(--gold)', fontFamily: 'var(--mono)' }}>{aadhaarData?.name}</div>
+          <div style={{ fontSize: '15px', fontWeight: 500, color: 'var(--gold)', fontFamily: 'var(--mono)' }}>{userData?.aadhaarName}</div>
           <div style={{ fontSize: '11px', color: 'var(--text3)', marginTop: '4px' }}>PAN name must match this exactly</div>
         </div>
 
@@ -164,7 +214,7 @@ const handlePanUpload =
                 <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">PAN Name</span><span className="ocr-val">{panData?.name}</span></div>
                 <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Name Match</span>{
   panData?.name ===
-  "RAJESH KUMAR SHARMA"
+  userData?.aadhaarName
 
   ? (
 

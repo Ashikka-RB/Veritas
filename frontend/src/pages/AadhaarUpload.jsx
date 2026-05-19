@@ -49,11 +49,16 @@ export default function AadhaarUpload() {
     selectedFile
   );
 
-  const ocrResponse = await fetch(
+const ocrResponse =
+  await fetch(
     "http://localhost:8000/api/ocr/aadhaar",
     {
       method: "POST",
-      body: ocrFormData
+      headers: {
+        Authorization:
+          `Bearer ${token}`
+      },
+      body: formData
     }
   );
 

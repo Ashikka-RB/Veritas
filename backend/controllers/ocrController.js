@@ -1,4 +1,5 @@
 const Tesseract = require("tesseract.js");
+const User = require("../models/User");
 
 const extractAadhaarData = async (req, res) => {
 
@@ -110,6 +111,28 @@ const upperLine =
 }
 
     console.log(extractedText);
+
+    const userId =
+  req.user.id;
+
+await User.findByIdAndUpdate(
+
+  userId,
+
+  {
+
+    aadhaarName: name,
+
+    aadhaarDOB: dob,
+
+    aadhaarGender: gender,
+
+    aadhaarNumber:
+      aadhaarNumber
+
+  }
+
+);
 
     res.status(200).json({
   message: "OCR Extraction Success",
@@ -231,6 +254,16 @@ for (let i = 0; i < lines.length; i++) {
   }
 
 }
+const userId =
+  req.user.id;
+await User.findByIdAndUpdate(
+  userId,
+  {
+    panName: name,
+    panDOB: dob,
+    panNumber:panNumber
+  }
+);
 
       res.status(200).json({
 
