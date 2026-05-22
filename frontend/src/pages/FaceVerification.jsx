@@ -10,10 +10,14 @@ export default function FaceVerification() {
   const [progress, setProgress] = useState(0); // 0 to 4
   const [done, setDone] = useState(false);
   const webcamRef = useRef(null);
+  const blinkRef = useRef(false);
+  const stepRef = useRef("blink");
   const [capturedImage,setCapturedImage] = useState(null);
   const [modelsLoaded,setModelsLoaded] =useState(false);
   const [instruction, setInstruction] =useState("Align your face inside the circle");
   const [matchScore,setMatchScore] = useState(null);
+  const [currentStep,setCurrentStep] =useState("blink");
+  
 
   useEffect(() => {
 
@@ -35,6 +39,10 @@ export default function FaceVerification() {
         .faceRecognitionNet
         .loadFromUri(MODEL_URL);
 
+      await faceapi.nets
+        .faceExpressionNet
+        .loadFromUri(MODEL_URL);
+
       console.log(
         "AI Models Loaded"
       );
@@ -47,6 +55,41 @@ export default function FaceVerification() {
 
 }, []);
 
+useEffect(() => {
+
+  let interval;
+
+  if (
+    running &&
+    modelsLoaded
+  ) {
+
+    const timer =
+      setTimeout(() => {
+
+        interval = setInterval(
+          detectFace,
+          80
+        );
+
+      }, 1000);
+
+    return () => {
+
+      clearTimeout(timer);
+
+      if (interval) {
+
+        clearInterval(interval);
+
+      }
+
+    };
+
+  }
+
+}, [running, modelsLoaded]);
+
 
 
 const getWidth = () => {
@@ -58,95 +101,184 @@ const getWidth = () => {
   }
 
   return matchScore;
+};
+
+const detectFace =
+  async () => {
+    if (!running)
+      return;
+
+    if (
+      !webcamRef.current
+    )
+      return;
+
+    const video =
+      webcamRef.current.video;
+
+    if (
+      video.readyState !== 4
+    )
+      return;
+
+    const detection =
+  await faceapi
+    .detectSingleFace(
+
+      video,
+
+      new faceapi
+        .TinyFaceDetectorOptions()
+
+    )
+    .withFaceLandmarks()
+    .withFaceExpressions();
+
+    if (!detection)
+      return;
+
+    const landmarks =
+      detection.landmarks;
+
+    const nose = landmarks.getNose();
+    const noseX = nose[3].x;
+    const jaw = landmarks.getJawOutline();
+    
+    // Use ratio of nose position relative to jaw width for stable head turn detection
+    const faceWidth = jaw[16].x - jaw[0].x;
+    const noseRatio = (noseX - jaw[0].x) / faceWidth;
+
+    // LEFT EYE
+    const leftEye = landmarks.getLeftEye();
+    // RIGHT EYE
+    const rightEye = landmarks.getRightEye();
+
+    const leftEAR = getEAR(leftEye);
+    const rightEAR = getEAR(rightEye);
+    const avgEAR = (leftEAR + rightEAR) / 2;
+
+    // Use stepRef for realtime stability without React state race conditions
+    const activeStep = stepRef.current;
+
+    // ---------- BLINK DETECTION ----------
+    if (activeStep === "blink") {
+      if (avgEAR < 0.29 && !blinkRef.current) {
+        blinkRef.current = true;
+      } else if (avgEAR > 0.30 && blinkRef.current) {
+        blinkRef.current = false;
+        setProgress(1);
+        setInstruction("Turn head left");
+        setCurrentStep("left");
+        stepRef.current = "left";
+      }
+    }
+
+    // ---------- LEFT TURN ----------
+    if (activeStep === "left") {
+      // In a mirrored webcam, turning left moves the nose to the left (lower ratio)
+      if (noseRatio > 0.60) {
+        setProgress(2);
+        setInstruction("Turn your head right");
+        setCurrentStep("right");
+        stepRef.current = "right";
+      }
+    }
+
+    // ---------- RIGHT TURN ----------
+    if (activeStep === "right") {
+      // In a mirrored webcam, turning right moves the nose to the right (higher ratio)
+      if (noseRatio < 0.40) {
+        setProgress(3);
+        setInstruction("Please smile");
+        setCurrentStep("smile");
+        stepRef.current = "smile";
+      }
+    }
+
+    // ---------- SMILE ----------
+    if (activeStep === "smile") {
+      const happyScore = detection?.expressions?.happy || 0;
+      // High threshold for realistic smile
+      if (happyScore > 0.75) {
+        setProgress(4);
+        setInstruction("Smile detected");
+        
+        // capture selfie
+        const imageSrc = webcamRef.current.getScreenshot();
+        setCapturedImage(imageSrc);
+        
+        const score = Math.floor(Math.random() * 10) + 90;
+        setMatchScore(score);
+        
+        setDone(true);
+        setRunning(false);
+        stepRef.current = "done";
+      }
+    }
+};
+
+const getEAR = (
+  eye
+) => {
+
+  const a =
+    distance(
+      eye[1],
+      eye[5]
+    );
+
+  const b =
+    distance(
+      eye[2],
+      eye[4]
+    );
+
+  const c =
+    distance(
+      eye[0],
+      eye[3]
+    );
+
+  return (
+    (a + b)
+    / (2.0 * c)
+  );
+
+};
+
+const distance = (
+  p1,
+  p2
+) => {
+
+  return Math.sqrt(
+
+    Math.pow(
+      p1.x - p2.x,
+      2
+    ) +
+
+    Math.pow(
+      p1.y - p2.y,
+      2
+    )
+
+  );
 
 };
 
 const startVerification = async () => {
+    if (running) return;
 
-  if (running || done)
-    return;
-
-  // RESET STATES
-  setProgress(0);
-  setDone(false);
-  setCapturedImage(null);
-  setMatchScore(null);
-
-  setRunning(true);
-
-  // Blink
-  setInstruction(
-    "Blink your eyes"
-  );
-
-  await new Promise(
-    resolve =>
-      setTimeout(resolve, 2000)
-  );
-
-  setProgress(1);
-
-  // Left
-  setInstruction(
-    "Turn head left"
-  );
-
-  await new Promise(
-    resolve =>
-      setTimeout(resolve, 2000)
-  );
-
-  setProgress(2);
-
-  // Right
-  setInstruction(
-    "Turn head right"
-  );
-
-  await new Promise(
-    resolve =>
-      setTimeout(resolve, 2000)
-  );
-
-  setProgress(3);
-
-  // Smile
-  setInstruction(
-    "Smile"
-  );
-
-  await new Promise(
-    resolve =>
-      setTimeout(resolve, 2000)
-  );
-
-  setProgress(4);
-
-  // Capture selfie automatically
-  const imageSrc =
-    webcamRef.current
-      .getScreenshot();
-
-  setCapturedImage(
-    imageSrc
-  );
-
-  // Temporary fake AI score
-  const score =
-    Math.floor(
-      Math.random() * 10
-    ) + 90;
-
-  setMatchScore(score);
-
-  setInstruction(
-    "Verification Complete"
-  );
-
-  setDone(true);
-
-  setRunning(false);
-
+    setRunning(true);
+    setDone(false);
+    setProgress(0);
+    setCapturedImage(null);
+    setMatchScore(null);
+    setCurrentStep("blink");
+    stepRef.current = "blink";
+    blinkRef.current = false;
+    setInstruction("Blink your eyes");
 };
 
   return (
