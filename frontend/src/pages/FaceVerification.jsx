@@ -17,6 +17,8 @@ export default function FaceVerification() {
   const [instruction, setInstruction] =useState("Align your face inside the circle");
   const [matchScore,setMatchScore] = useState(null);
   const [currentStep,setCurrentStep] =useState("blink");
+  const [aadhaarImage,setAadhaarImage] = useState(null);
+  const [aadhaarLoaded,setAadhaarLoaded] = useState(false);
   
 
   useEffect(() => {
@@ -90,7 +92,85 @@ useEffect(() => {
 
 }, [running, modelsLoaded]);
 
+useEffect(() => {
 
+  const fetchUser =
+    async () => {
+
+      try {
+
+        const token =
+          localStorage.getItem(
+            "token"
+          );
+          console.log(
+            "TOKEN:",
+            token
+          );
+
+        if (!token) {
+
+          console.log(
+            "No token found"
+          );
+
+          return;
+
+        }
+
+        const res =
+          await fetch(
+            "http://localhost:8000/api/auth/profile",
+            {
+              headers: {
+                Authorization:
+                  `Bearer ${token}`
+              }
+            }
+          );
+
+          console.log("STATUS:", res.status);
+
+        const data =
+          await res.json();
+
+          console.log("DATA:", data);
+
+        console.log(
+          "PROFILE DATA:",
+          data
+        );
+
+        if (
+          data.aadhaarFile
+        ) {
+
+          const imageUrl =
+            `http://localhost:8000/${data.aadhaarFile}`;
+
+          console.log(
+            "AADHAAR URL:",
+            imageUrl
+          );
+
+          setAadhaarImage(
+            imageUrl
+          );
+          setAadhaarLoaded(true);
+
+        }
+
+      } catch (err) {
+
+        console.log(err);
+
+      }
+
+    };
+
+  fetchUser();
+
+}, []);
 
 const getWidth = () => {
 
@@ -124,15 +204,13 @@ const detectFace =
     const detection =
   await faceapi
     .detectSingleFace(
-
       video,
-
       new faceapi
         .TinyFaceDetectorOptions()
-
     )
     .withFaceLandmarks()
-    .withFaceExpressions();
+    .withFaceExpressions()
+    .withFaceDescriptor();
 
     if (!detection)
       return;
@@ -199,7 +277,7 @@ const detectFace =
     if (activeStep === "smile") {
       const happyScore = detection?.expressions?.happy || 0;
       // High threshold for realistic smile
-      if (happyScore > 0.75) {
+      if (happyScore > 0.35) {
         setProgress(4);
         setInstruction("Smile detected");
         
@@ -207,8 +285,78 @@ const detectFace =
         const imageSrc = webcamRef.current.getScreenshot();
         setCapturedImage(imageSrc);
         
-        const score = Math.floor(Math.random() * 10) + 90;
-        setMatchScore(score);
+        try {
+
+  // LOAD AADHAAR IMAGE
+  const aadhaarImg =
+    await faceapi.fetchImage(
+      aadhaarImage
+    );
+
+  // DETECT FACE IN AADHAAR
+  const aadhaarDetection =
+    await faceapi
+      .detectSingleFace(
+        aadhaarImg,
+        new faceapi
+          .TinyFaceDetectorOptions()
+      )
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+  if (!aadhaarDetection) {
+
+    alert(
+      "No face found in Aadhaar image"
+    );
+
+    return;
+
+  }
+
+  // LIVE SELFIE DESCRIPTOR
+  const selfieDescriptor =
+    detection.descriptor;
+
+  // AADHAAR DESCRIPTOR
+  const aadhaarDescriptor =
+    aadhaarDetection.descriptor;
+
+  // COMPARE
+  const distance =
+    faceapi.euclideanDistance(
+      selfieDescriptor,
+      aadhaarDescriptor
+    );
+
+  console.log(
+    "Distance:",
+    distance
+  );
+
+  // CONVERT TO %
+  const similarity =
+    Math.max(
+      0,
+      Math.round(
+        (1 - distance) * 100
+      )
+    );
+
+  console.log(
+    "Similarity:",
+    similarity
+  );
+
+  setMatchScore(
+    similarity
+  );
+
+} catch (err) {
+
+  console.log(err);
+
+}
         
         setDone(true);
         setRunning(false);
@@ -267,7 +415,17 @@ const distance = (
 
 };
 
+
 const startVerification = async () => {
+   if (!aadhaarLoaded) {
+
+    alert(
+      "Aadhaar image not loaded yet"
+    );
+
+    return;
+
+  }
     if (running) return;
 
     setRunning(true);
