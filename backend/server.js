@@ -15,7 +15,7 @@
 
 // app.use(
 //   cors({
-//     origin: "http://localhost:5173",
+//     origin: "http://localhost:5174",
 //     credentials: true
 //   })
 // );
@@ -58,7 +58,10 @@
 //   console.log(`Server running on port ${PORT}`);
 // });
 
-
+const verificationRoutes =
+require(
+  "./routes/verificationRoutes"
+);
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -79,7 +82,7 @@ const app = express();
 // CORS
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5174",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   })
@@ -110,6 +113,11 @@ app.use("/api/upload", uploadRoutes);
 
 app.use("/api/ocr", ocrRoutes);
 
+app.use(
+  "/api/verification",
+  verificationRoutes
+);
+
 
 // TEST ROUTE
 app.get("/", (req, res) => {
@@ -137,7 +145,7 @@ app.get(
 
 
 const PORT =
-  process.env.PORT || 5000;
+  process.env.PORT || 8000;
 
 app.listen(PORT, () => {
 

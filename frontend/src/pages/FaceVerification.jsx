@@ -352,6 +352,11 @@ const detectFace =
     similarity
   );
 
+  localStorage.setItem(
+  "faceMatchScore",
+  similarity
+);
+
 } catch (err) {
 
   console.log(err);
