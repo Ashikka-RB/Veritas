@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
 
 import joblib
 
@@ -24,8 +25,8 @@ X = df[
 ]
 
 
-# Target
-y = df["fraud"]
+# Target (0=APPROVED, 1=MANUAL_REVIEW, 2=REJECTED)
+y = df["status"]
 
 
 # Split data
@@ -33,7 +34,8 @@ X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
     test_size=0.2,
-    random_state=42
+    random_state=42,
+    stratify=y
 )
 
 
@@ -49,9 +51,11 @@ model.fit(
 )
 
 
-# Test model
+# Predictions
 predictions = model.predict(X_test)
 
+
+# Accuracy
 accuracy = accuracy_score(
     y_test,
     predictions
@@ -62,6 +66,22 @@ print(
 )
 
 
+# Detailed report
+print("\nClassification Report:\n")
+
+print(
+    classification_report(
+        y_test,
+        predictions,
+        target_names=[
+            "APPROVED",
+            "MANUAL_REVIEW",
+            "REJECTED"
+        ]
+    )
+)
+
+
 # Save model
 joblib.dump(
     model,
@@ -69,5 +89,5 @@ joblib.dump(
 )
 
 print(
-    "Model saved as fraud_model.pkl"
+    "\nModel saved as fraud_model.pkl"
 )

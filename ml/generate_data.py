@@ -3,38 +3,55 @@ import random
 
 data = []
 
-for i in range(500):
+for i in range(1000):
 
-    faceMatch = random.randint(10, 100)
+    # Most users are genuine
 
-    panMatched = random.choice([0, 1])
+    faceMatch = random.randint(40, 100)
 
-    livenessPassed = random.choice([0, 1])
+    panMatched = random.choices(
+        [1, 0],
+        weights=[90, 10]
+    )[0]
+
+    livenessPassed = random.choices(
+        [1, 0],
+        weights=[95, 5]
+    )[0]
 
     ocrConfidence = random.randint(60, 100)
 
-    risk = 0
+    # REJECTED
 
-    if faceMatch < 50:
-        risk += 40
+    if (
+        faceMatch < 50
+        or panMatched == 0
+        or livenessPassed == 0
+    ):
 
-    if panMatched == 0:
-        risk += 30
+        status = 2
 
-    if livenessPassed == 0:
-        risk += 30
+    # MANUAL REVIEW
 
-    if ocrConfidence < 75:
-        risk += 10
+    elif (
+        faceMatch < 80
+        or ocrConfidence < 80
+    ):
 
-    fraud = 1 if risk >= 60 else 0
+        status = 1
+
+    # APPROVED
+
+    else:
+
+        status = 0
 
     data.append([
         faceMatch,
         panMatched,
         livenessPassed,
         ocrConfidence,
-        fraud
+        status
     ])
 
 df = pd.DataFrame(
@@ -44,7 +61,7 @@ df = pd.DataFrame(
         "panMatched",
         "livenessPassed",
         "ocrConfidence",
-        "fraud"
+        "status"
     ]
 )
 
@@ -53,4 +70,10 @@ df.to_csv(
     index=False
 )
 
-print("500 records generated successfully")
+print("1000 records generated successfully")
+
+print("\nStatus Distribution:\n")
+
+print(
+    df["status"].value_counts()
+)

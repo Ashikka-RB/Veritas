@@ -16,6 +16,18 @@ const [riskScore,
   setRiskScore] =
   useState(null);
 
+const [approvedProbability,
+  setApprovedProbability] =
+  useState(null);
+
+const [manualReviewProbability,
+  setManualReviewProbability] =
+  useState(null);
+
+const [rejectedProbability,
+  setRejectedProbability] =
+  useState(null);
+
 const [finalStatus,
   setFinalStatus] =
   useState("PROCESSING");
@@ -30,70 +42,81 @@ const [finalStatus,
     setTimeout(resolve, ms)
   );
 
+const runFraudAnalysis =
+async (score) => {
 
+  try {
 
-  const runFraudAnalysis =
-  () => {
-    const livenessPassed = true;
+    const response =
+      await fetch(
+        "http://localhost:8000/api/verification/analyze",
+        {
+          method: "POST",
 
-    const panMatched = true;
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-    let risk = 0;
+          body: JSON.stringify({
 
-    if (faceMatch < 70)
-      risk += 40;
+            faceMatch: score,
 
-    if (!livenessPassed)
-      risk += 50;
+            panMatched: true,
 
-    if (!panMatched)
-      risk += 30;
+            livenessPassed: true,
 
-    const fraudProb =
-      Math.min(risk, 100);
+            ocrConfidence: 94
 
-    setFraudProbability(
-      fraudProb
-    );
+          })
 
-    setRiskScore(risk);
-
-    if (risk < 30) {
-
-      setFinalStatus(
-        "VERIFIED"
+        }
       );
 
-    } else if (risk < 60) {
+    const data =
+      await response.json();
 
-      setFinalStatus(
-        "MANUAL REVIEW"
-      );
+      setApprovedProbability(
+  data.approvedProbability
+);
 
-    } else {
+setManualReviewProbability(
+  data.manualReviewProbability
+);
 
-      setFinalStatus(
-        "REJECTED"
-      );
+setRejectedProbability(
+  data.rejectedProbability
+);
 
-    }
+setRiskScore(
+  data.rejectedProbability
+);
+
+setFinalStatus(
+  data.status
+);
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
 
 };
 
-
 useEffect(() => {
-
-        const score =
-  Number(
-    localStorage.getItem(
-      "faceMatchScore"
-    )
-  );
-
-  setFaceMatch(score);
 
   const startPipeline =
     async () => {
+
+      const score =
+        Number(
+          localStorage.getItem(
+            "faceMatchScore"
+          )
+        );
+
+      setFaceMatch(score);
 
       await delay(1000);
       setCurrentStage(1);
@@ -104,7 +127,7 @@ useEffect(() => {
       await delay(1000);
       setCurrentStage(3);
 
-      runFraudAnalysis();
+      await runFraudAnalysis(score);
 
       await delay(1500);
       setCurrentStage(4);
@@ -117,7 +140,6 @@ useEffect(() => {
   startPipeline();
 
 }, []);
-
 
   return (
     <div className="page active" id="p-processing">
@@ -181,7 +203,7 @@ useEffect(() => {
     <div style={{ fontSize: '11px', color: 'var(--text3)' }}>
       {
         currentStage >= 4
-          ? `Fraud Probability: ${fraudProbability}%`
+          ? `Approved: ${approvedProbability}% | Review: ${manualReviewProbability}% | Rejected: ${rejectedProbability}%`
           : 'Running scikit-learn model...'
       }
     </div>
@@ -226,7 +248,7 @@ useEffect(() => {
     <div style={{ fontSize: '11px', color: 'var(--text3)' }}>
       {
         currentStage >= 5
-          ? `Risk Score: ${riskScore}`
+          ? `Rejection Risk: ${riskScore}%`
           : 'Pending...'
       }
     </div>
@@ -306,7 +328,21 @@ useEffect(() => {
     {
       finalStatus === "PROCESSING"
         ? "Running fraud analysis..."
-        : `Final Status: ${finalStatus}`
+        : (
+  <span
+    style={{
+      color:
+        finalStatus === "APPROVED"
+          ? "green"
+          : finalStatus === "MANUAL_REVIEW"
+          ? "orange"
+          : "red",
+      fontWeight: "bold"
+    }}
+  >
+    Final Status: {finalStatus}
+  </span>
+)
     }
   </div>
 </div>

@@ -5,7 +5,8 @@ const router =
 express.Router();
 
 const {
-  saveVerification
+  saveVerification,
+  analyzeVerification
 } =
 require(
   "../controllers/verificationController"
@@ -14,6 +15,11 @@ require(
 router.post(
   "/save",
   saveVerification
+);
+
+router.post(
+  "/analyze",
+  analyzeVerification
 );
 
 module.exports =
