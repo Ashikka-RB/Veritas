@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-
 import joblib
 
 app = Flask(__name__)
@@ -18,6 +17,8 @@ def predict():
     data = request.json
 
     faceMatch = data["faceMatch"]
+
+
 
     panMatched = (
         1 if data["panMatched"]

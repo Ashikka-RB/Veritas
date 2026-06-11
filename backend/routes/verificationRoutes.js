@@ -1,26 +1,12 @@
-const express =
-require("express");
-
-const router =
-express.Router();
+const express = require("express");
+const router = express.Router();
 
 const {
-  saveVerification,
-  analyzeVerification
-} =
-require(
-  "../controllers/verificationController"
-);
+  analyzeVerification,
+  getVerificationStatus
+} = require("../controllers/verificationController");
 
-router.post(
-  "/save",
-  saveVerification
-);
+router.post("/analyze", analyzeVerification);
+router.get("/status/:userId", getVerificationStatus);
 
-router.post(
-  "/analyze",
-  analyzeVerification
-);
-
-module.exports =
-router;
+module.exports = router;

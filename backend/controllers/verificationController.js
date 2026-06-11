@@ -1,71 +1,36 @@
-const Verification =
-require("../models/Verification");
+const axios = require("axios");
+const AdminQueue = require("../models/AdminQueue");
 
-const axios =
-require("axios");
-
-const saveVerification =
-async (req, res) => {
-
+const analyzeVerification = async (req, res) => {
   try {
-
-    const verification =
-      await Verification.create(
-        req.body
-      );
-
-    res.status(201).json(
-      verification
+    const response = await axios.post(
+      "http://127.0.0.1:5001/predict",
+      req.body
     );
 
+    res.json(response.data);
   } catch (error) {
-
-    console.log(error);
-
+    console.log("ML ERROR:", error.message);
     res.status(500).json({
-      message:
-        "Failed to save verification"
+      message: "ML Analysis Failed",
+      error: error.message
     });
-
   }
-
 };
 
-const analyzeVerification =
-async (req, res) => {
-
+const getVerificationStatus = async (req, res) => {
   try {
-
-    const response =
-      await axios.post(
-        "http://127.0.0.1:5001/predict",
-        req.body
-      );
-
-    res.json(
-      response.data
-    );
-
+    const record = await AdminQueue.findOne({ userId: req.params.userId }).sort({ submittedAt: -1 });
+    if (!record) {
+      return res.status(404).json({ message: "No verification record found for this user" });
+    }
+    res.json(record);
   } catch (error) {
-
-    console.log(
-  "ML ERROR:",
-  error.message
-);
-
-    res.status(500).json({
-  message:
-    "ML Analysis Failed",
-
-  error:
-    error.message
-});
-
+    res.status(500).json({ message: "Failed to fetch status", error: error.message });
   }
-
 };
 
 module.exports = {
-  saveVerification,
-  analyzeVerification
+  analyzeVerification,
+  getVerificationStatus
 };

@@ -4,17 +4,46 @@ export default function AdminSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isActive = (path) => location.pathname === path ? 'active' : '';
+  // Highlight active sidebar item including dynamic sub-routes
+  const isActive = (path) => location.pathname.startsWith(path) ? 'active' : '';
+
+  const handleVerifyUsersClick = () => {
+    fetch('http://localhost:8000/api/admin/review-queue')
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch review queue');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data && data.length > 0) {
+          navigate(`/admin/verify-user/${data[0]._id}`);
+        } else {
+          alert('No pending reviews in the queue.');
+          navigate('/admin/dashboard');
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        navigate('/admin/dashboard');
+      });
+  };
 
   return (
     <div className="sidebar">
       <div className="sidebar-logo">Veritas Admin</div>
       <div className="sidebar-label">Overview</div>
-      <div className={`sidebar-item ${isActive('/admin/dashboard')}`} onClick={() => navigate('/admin/dashboard')}><i className="ti ti-layout-dashboard"></i> Dashboard</div>
+      <div className={`sidebar-item ${isActive('/admin/dashboard')}`} onClick={() => navigate('/admin/dashboard')}>
+        <i className="ti ti-layout-dashboard"></i> Dashboard
+      </div>
       
       <div className="sidebar-label">Review</div>
-      <div className={`sidebar-item ${isActive('/admin/verify-user')}`} onClick={() => navigate('/admin/verify-user')}><i className="ti ti-user-check"></i> Verify Users</div>
-      <div className={`sidebar-item ${isActive('/admin/fraud')}`} onClick={() => navigate('/admin/fraud')}><i className="ti ti-alert-triangle"></i> Fraud Monitor</div>
+      <div className={`sidebar-item ${isActive('/admin/verify-user')}`} onClick={handleVerifyUsersClick}>
+        <i className="ti ti-user-check"></i> Verify Users
+      </div>
+      <div className={`sidebar-item ${isActive('/admin/fraud')}`} onClick={() => navigate('/admin/fraud')}>
+        <i className="ti ti-alert-triangle"></i> Fraud Monitor
+      </div>
       
       <div className="sidebar-label">System</div>
       <div className="sidebar-item" onClick={() => navigate('/')}><i className="ti ti-logout"></i> Sign Out</div>

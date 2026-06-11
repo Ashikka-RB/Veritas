@@ -79,7 +79,7 @@ function App() {
 
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/verify-user" element={<VerifyUser />} />
+        <Route path="/admin/verify-user/:id" element={<VerifyUser />} />
         <Route path="/admin/fraud" element={<FraudMonitor />} />
       </Routes>
     </BrowserRouter>

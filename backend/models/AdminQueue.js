@@ -5,9 +5,25 @@ const adminQueueSchema =
 new mongoose.Schema({
 
   userId: {
-  type: String,
-  default: null
-},
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null
+  },
+
+  fullName: {
+    type: String,
+    default: null
+  },
+
+  email: {
+    type: String,
+    default: null
+  },
+
+  phone: {
+    type: String,
+    default: null
+  },
 
   faceMatchScore: Number,
 

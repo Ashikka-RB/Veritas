@@ -123,6 +123,42 @@ async (
 ) => {
 
   try {
+    let actualUserId = localStorage.getItem("userId");
+    let fullName = null;
+    let email = null;
+    let phone = null;
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      const res = await fetch("http://localhost:8000/api/auth/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (res.ok) {
+        const profile = await res.json();
+        console.log("PROFILE OBJECT RETRIEVED IN PROCESSING.JSX:", profile);
+        actualUserId = profile._id;
+        fullName = profile.fullName;
+        email = profile.email;
+        phone = profile.phone;
+        localStorage.setItem("userId", profile._id);
+      }
+    }
+
+    const payload = {
+      userId: actualUserId || "guest",
+      fullName: fullName || "Guest User",
+      email: email || "guest@example.com",
+      phone: phone || "N/A",
+      faceMatchScore: score,
+      ocrConfidence: 94,
+      finalStatus: status,
+      approvedProbability: approved,
+      manualReviewProbability: review,
+      rejectedProbability: rejected
+    };
+    console.log("REQUEST BODY SENT TO /api/admin/submit:", payload);
 
     await fetch(
       "http://localhost:8000/api/admin/submit",
@@ -134,32 +170,7 @@ async (
             "application/json"
         },
 
-        body: JSON.stringify({
-
-          userId:
-            localStorage.getItem(
-              "userId"
-            ) || "guest",
-
-          faceMatchScore:
-            score,
-
-          ocrConfidence:
-            94,
-
-          finalStatus:
-            status,
-
-          approvedProbability:
-            approved,
-
-          manualReviewProbability:
-            review,
-
-          rejectedProbability:
-            rejected
-
-        })
+        body: JSON.stringify(payload)
 
       }
     );
@@ -179,6 +190,22 @@ useEffect(() => {
 
   const startPipeline =
     async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const res = await fetch("http://localhost:8000/api/auth/profile", {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          if (res.ok) {
+            const profile = await res.json();
+            localStorage.setItem("userId", profile._id);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile on mount:", err);
+      }
 
       const score =
         Number(
