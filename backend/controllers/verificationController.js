@@ -48,12 +48,18 @@ async (req, res) => {
 
   } catch (error) {
 
-    console.log(error);
+    console.log(
+  "ML ERROR:",
+  error.message
+);
 
     res.status(500).json({
-      message:
-        "ML Analysis Failed"
-    });
+  message:
+    "ML Analysis Failed",
+
+  error:
+    error.message
+});
 
   }
 

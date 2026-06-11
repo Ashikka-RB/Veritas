@@ -36,6 +36,10 @@ const [finalStatus,
   setFaceMatch] =
   useState(0);
 
+  const [queueSubmitted,
+  setQueueSubmitted] =
+  useState(false);
+
 
   const delay = (ms) =>
   new Promise(resolve =>
@@ -76,6 +80,8 @@ async (score) => {
     const data =
       await response.json();
 
+      console.log("ML RESPONSE:", data);
+
       setApprovedProbability(
   data.approvedProbability
 );
@@ -96,6 +102,70 @@ setFinalStatus(
   data.status
 );
 
+return data;
+  } 
+  
+  catch (error) {
+
+    console.log(error);
+    return null;
+  }
+
+};
+
+const submitToAdminQueue =
+async (
+  status,
+  approved,
+  review,
+  rejected,
+  score
+) => {
+
+  try {
+
+    await fetch(
+      "http://localhost:8000/api/admin/submit",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json"
+        },
+
+        body: JSON.stringify({
+
+          userId:
+            localStorage.getItem(
+              "userId"
+            ) || "guest",
+
+          faceMatchScore:
+            score,
+
+          ocrConfidence:
+            94,
+
+          finalStatus:
+            status,
+
+          approvedProbability:
+            approved,
+
+          manualReviewProbability:
+            review,
+
+          rejectedProbability:
+            rejected
+
+        })
+
+      }
+    );
+
+    setQueueSubmitted(true);
+
   } catch (error) {
 
     console.log(error);
@@ -103,6 +173,7 @@ setFinalStatus(
   }
 
 };
+
 
 useEffect(() => {
 
@@ -126,16 +197,36 @@ useEffect(() => {
 
       await delay(1000);
       setCurrentStage(3);
-
+      
+      const mlResult =
       await runFraudAnalysis(score);
 
-      await delay(1500);
-      setCurrentStage(4);
+      if (!mlResult) {
+  return;
+}
 
-      await delay(1500);
-      setCurrentStage(5);
+await delay(1500);
+setCurrentStage(4);
+
+await delay(1500);
+setCurrentStage(5);
+
+await submitToAdminQueue(
+
+  mlResult.status,
+
+  mlResult.approvedProbability,
+
+  mlResult.manualReviewProbability,
+
+  mlResult.rejectedProbability,
+
+  score
+
+);
 
     };
+
 
   startPipeline();
 
@@ -255,15 +346,34 @@ useEffect(() => {
   </div>
 </div>
 
-<div className="ai-step" style={{ opacity: 0.4 }}>
+<div
+  className="ai-step"
+  style={{
+    opacity:
+      queueSubmitted
+        ? 1
+        : 0.4
+  }}
+>
   <div
     className="ai-step-icon"
     style={{
-      background: 'var(--bg4)',
-      color: 'var(--text4)'
-    }}
+  background:
+    queueSubmitted
+      ? 'var(--green-dim)'
+      : 'var(--bg4)',
+
+  color:
+    queueSubmitted
+      ? 'var(--green)'
+      : 'var(--text4)'
+}}
   >
-    <i className="ti ti-clock"></i>
+    {
+  queueSubmitted
+    ? <i className="ti ti-check"></i>
+    : <i className="ti ti-clock"></i>
+}
   </div>
 
   <div>
@@ -282,7 +392,11 @@ useEffect(() => {
         color: 'var(--text3)'
       }}
     >
-      Pending...
+      {
+  queueSubmitted
+    ? "Submitted Successfully"
+    : "Pending..."
+}
     </div>
   </div>
 </div>

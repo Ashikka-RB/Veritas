@@ -15,7 +15,7 @@
 
 // app.use(
 //   cors({
-//     origin: "http://localhost:5174",
+//     origin: "http://localhost:5173",
 //     credentials: true
 //   })
 // );
@@ -73,6 +73,7 @@ const connectDB = require("./config/db");
 const uploadRoutes = require("./routes/uploadRoutes");
 const ocrRoutes = require("./routes/ocrRoutes");
 const authRoutes = require("./routes/authRoutes");
+const adminQueueRoutes = require("./routes/adminQueueRoutes");
 
 const protect = require("./middleware/authMiddleware");
 
@@ -82,7 +83,7 @@ const app = express();
 // CORS
 app.use(
   cors({
-    origin: "http://localhost:5174",
+    origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   })
@@ -113,10 +114,9 @@ app.use("/api/upload", uploadRoutes);
 
 app.use("/api/ocr", ocrRoutes);
 
-app.use(
-  "/api/verification",
-  verificationRoutes
-);
+app.use("/api/verification",verificationRoutes);
+
+app.use("/api/admin",adminQueueRoutes);
 
 
 // TEST ROUTE
