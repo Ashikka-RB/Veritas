@@ -27,6 +27,16 @@ const userSchema = new mongoose.Schema({
     default: false
   },
 
+  otp: {
+    type: String,
+    default: null
+  },
+
+  otpExpiry: {
+    type: Date,
+    default: null
+  },
+
   aadhaarFile: {
   type: String
 },
