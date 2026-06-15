@@ -78,7 +78,13 @@ export default function Status() {
                 <i className="ti ti-circle-check"></i> Verification Approved
               </div>
               <h1 style={{ fontFamily: 'var(--display)', fontSize: '36px', fontWeight: 400, marginBottom: '8px' }}>Your identity has<br/>been verified</h1>
-              <p style={{ color: 'var(--text2)', fontSize: '14px' }}>You have successfully completed the eKYC process.</p>
+              <p style={{ color: 'var(--text2)', fontSize: '14px', marginBottom: '16px' }}>You have successfully completed the eKYC process.</p>
+              {status?.adminNotes && (
+                <div className="card" style={{ maxWidth: '500px', margin: '16px auto 0', textAlign: 'left', background: 'var(--bg3)', border: '0.5px solid var(--border)' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--green)', textTransform: 'uppercase', marginBottom: '6px' }}>Admin Notes</div>
+                  <div style={{ fontSize: '13px', color: 'var(--text)' }}>{status.adminNotes}</div>
+                </div>
+              )}
             </>
           ) : decision === 'REJECTED' ? (
             <>
@@ -86,7 +92,34 @@ export default function Status() {
                 <i className="ti ti-circle-x"></i> Verification Rejected
               </div>
               <h1 style={{ fontFamily: 'var(--display)', fontSize: '36px', fontWeight: 400, marginBottom: '8px' }}>Verification failed</h1>
-              <p style={{ color: 'var(--text2)', fontSize: '14px' }}>Your submission did not pass our verification criteria.</p>
+              <p style={{ color: 'var(--text2)', fontSize: '14px', marginBottom: '16px' }}>Your submission did not pass our verification criteria.</p>
+              {status?.rejectionReason && (
+                <div className="card" style={{ maxWidth: '500px', margin: '16px auto 0', textAlign: 'left', background: 'var(--bg3)', border: '0.5px solid var(--red)' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--red)', textTransform: 'uppercase', marginBottom: '6px' }}>Reason for Rejection</div>
+                  <div style={{ fontSize: '13px', color: 'var(--text)' }}>{status.rejectionReason}</div>
+                </div>
+              )}
+            </>
+          ) : decision === 'REUPLOAD_REQUIRED' ? (
+            <>
+              <div className="status-badge-lg" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', border: '0.5px solid rgba(232,160,48,0.25)' }}>
+                <i className="ti ti-alert-circle"></i> Action Required
+              </div>
+              <h1 style={{ fontFamily: 'var(--display)', fontSize: '36px', fontWeight: 400, marginBottom: '8px' }}>Please Re-upload Documents</h1>
+              <p style={{ color: 'var(--text2)', fontSize: '14px', marginBottom: '16px' }}>The admin has requested that you re-submit your documents.</p>
+              {status?.reuploadReason && (
+                <div className="card" style={{ maxWidth: '500px', margin: '16px auto 16px', textAlign: 'left', background: 'var(--bg3)', border: '0.5px solid var(--amber)' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--amber)', textTransform: 'uppercase', marginBottom: '6px' }}>Reason for Request</div>
+                  <div style={{ fontSize: '13px', color: 'var(--text)' }}>{status.reuploadReason}</div>
+                </div>
+              )}
+              <button 
+                className="btn btn-gold btn-lg" 
+                onClick={() => navigate('/verify/start')} 
+                style={{ marginTop: '8px', marginBottom: '16px' }}
+              >
+                Re-upload Documents
+              </button>
             </>
           ) : (
             <>
@@ -119,6 +152,11 @@ export default function Status() {
               <>
                 <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ Admin Review Completed</div></div>
                 <div className="tl-item"><div className="tl-dot active" style={{ background: 'var(--red)' }}></div><div className="tl-title" style={{ color: 'var(--red)' }}>✖ Verification Rejected</div></div>
+              </>
+            ) : decision === 'REUPLOAD_REQUIRED' ? (
+              <>
+                <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ Admin Review Completed</div></div>
+                <div className="tl-item"><div className="tl-dot active" style={{ background: 'var(--amber)' }}></div><div className="tl-title" style={{ color: 'var(--amber)' }}>⚠ Re-upload Required</div></div>
               </>
             ) : (
               <>

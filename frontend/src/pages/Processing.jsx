@@ -187,6 +187,7 @@ async (
 
 
 useEffect(() => {
+  let isCancelled = false;
 
   const startPipeline =
     async () => {
@@ -198,7 +199,7 @@ useEffect(() => {
               Authorization: `Bearer ${token}`
             }
           });
-          if (res.ok) {
+          if (res.ok && !isCancelled) {
             const profile = await res.json();
             localStorage.setItem("userId", profile._id);
           }
@@ -214,48 +215,58 @@ useEffect(() => {
           )
         );
 
+      if (isCancelled) return;
       setFaceMatch(score);
 
       await delay(1000);
+      if (isCancelled) return;
       setCurrentStage(1);
 
       await delay(1000);
+      if (isCancelled) return;
       setCurrentStage(2);
 
       await delay(1000);
+      if (isCancelled) return;
       setCurrentStage(3);
       
       const mlResult =
       await runFraudAnalysis(score);
 
-      if (!mlResult) {
-  return;
-}
+      if (!mlResult || isCancelled) {
+        return;
+      }
 
-await delay(1500);
-setCurrentStage(4);
+      await delay(1500);
+      if (isCancelled) return;
+      setCurrentStage(4);
 
-await delay(1500);
-setCurrentStage(5);
+      await delay(1500);
+      if (isCancelled) return;
+      setCurrentStage(5);
 
-await submitToAdminQueue(
+      await submitToAdminQueue(
 
-  mlResult.status,
+        mlResult.status,
 
-  mlResult.approvedProbability,
+        mlResult.approvedProbability,
 
-  mlResult.manualReviewProbability,
+        mlResult.manualReviewProbability,
 
-  mlResult.rejectedProbability,
+        mlResult.rejectedProbability,
 
-  score
+        score
 
-);
+      );
 
     };
 
 
   startPipeline();
+
+  return () => {
+    isCancelled = true;
+  };
 
 }, []);
 

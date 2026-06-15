@@ -37,6 +37,21 @@ new mongoose.Schema({
 
   rejectedProbability: Number,
 
+  adminNotes: {
+    type: String,
+    default: null
+  },
+
+  rejectionReason: {
+    type: String,
+    default: null
+  },
+
+  reuploadReason: {
+    type: String,
+    default: null
+  },
+
   adminDecision: {
     type: String,
     default: "PENDING"
@@ -48,6 +63,16 @@ new mongoose.Schema({
   }
 
 });
+
+adminQueueSchema.index(
+  { userId: 1, email: 1 },
+  { 
+    unique: true, 
+    partialFilterExpression: { 
+      adminDecision: "PENDING"
+    } 
+  }
+);
 
 module.exports =
 mongoose.model(

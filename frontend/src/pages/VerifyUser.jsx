@@ -30,6 +30,8 @@ export default function VerifyUser() {
   const queue = data?.queue;
   const dbUser = data?.user;
 
+  const [notes, setNotes] = useState('');
+
   console.log("QUEUE:", queue);
   console.log("USER:", dbUser);
 
@@ -37,7 +39,11 @@ export default function VerifyUser() {
     if (!queue?._id) return;
     try {
       await fetch(`http://localhost:8000/api/admin/approve/${queue._id}`, {
-        method: 'PUT',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ adminNotes: notes })
       });
       navigate('/admin/dashboard');
     } catch (error) {
@@ -47,9 +53,37 @@ export default function VerifyUser() {
 
   const rejectUserRecord = async () => {
     if (!queue?._id) return;
+    if (!notes.trim()) {
+      alert('Please enter a rejection reason in the Admin Notes field.');
+      return;
+    }
     try {
       await fetch(`http://localhost:8000/api/admin/reject/${queue._id}`, {
-        method: 'PUT',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ adminNotes: notes })
+      });
+      navigate('/admin/dashboard');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const reuploadUserRecord = async () => {
+    if (!queue?._id) return;
+    if (!notes.trim()) {
+      alert('Please enter a reason for requesting re-upload in the Admin Notes field.');
+      return;
+    }
+    try {
+      await fetch(`http://localhost:8000/api/admin/reupload/${queue._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ adminNotes: notes })
       });
       navigate('/admin/dashboard');
     } catch (error) {
@@ -91,7 +125,7 @@ export default function VerifyUser() {
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button className="btn btn-danger" style={{ fontSize: '13px' }} onClick={rejectUserRecord}>Reject</button>
-              <button className="btn btn-outline" style={{ fontSize: '13px' }}>Request Re-upload</button>
+              <button className="btn btn-outline" style={{ fontSize: '13px' }} onClick={reuploadUserRecord}>Request Re-upload</button>
               <button className="btn btn-success" style={{ fontSize: '13px', padding: '10px 24px' }} onClick={approveUserRecord}>✓ Approve</button>
             </div>
           </div>
@@ -269,9 +303,15 @@ export default function VerifyUser() {
 
           <div className="card" style={{ background: 'var(--bg3)' }}>
             <div style={{ fontSize: '13px', fontWeight: 500, marginBottom: '12px' }}>Admin Notes</div>
-            <textarea rows="3" placeholder="Add review notes here..."></textarea>
+            <textarea
+              rows="3"
+              placeholder="Add review notes here..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            ></textarea>
             <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
               <button className="btn btn-success btn-full" onClick={approveUserRecord}>✓ Approve &amp; Notify User</button>
+              <button className="btn btn-outline btn-full" onClick={reuploadUserRecord}>Request Re-upload</button>
               <button className="btn btn-danger btn-full" onClick={rejectUserRecord}>✕ Reject with Reason</button>
             </div>
           </div>

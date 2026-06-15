@@ -6,6 +6,20 @@ const submitToQueue =
 async (req, res) => {
   console.log("BACKEND RECEIVED SUBMIT BODY:", req.body);
   try {
+    const mongoose = require("mongoose");
+    const { userId, email } = req.body;
+
+    const isUserIdValid = userId && mongoose.Types.ObjectId.isValid(userId);
+    const existingQuery = {
+      adminDecision: "PENDING",
+      ...(isUserIdValid ? { userId } : { email })
+    };
+
+    const existing = await AdminQueue.findOne(existingQuery);
+    if (existing) {
+      console.log("PENDING RECORD ALREADY EXISTS FOR USER, RETURNING EXISTING:", existing);
+      return res.status(200).json(existing);
+    }
 
     const item =
       await AdminQueue.create(
@@ -20,6 +34,25 @@ async (req, res) => {
     "ADMIN QUEUE ERROR:",
     error
   );
+
+  if (error.code === 11000) {
+    console.log("CONCURRENT SUBMISSION DETECTED (DUPLICATE KEY 11000). RETRIEVING EXISTING PENDING RECORD.");
+    try {
+      const mongoose = require("mongoose");
+      const { userId, email } = req.body;
+      const isUserIdValid = userId && mongoose.Types.ObjectId.isValid(userId);
+      const existingQuery = {
+        adminDecision: "PENDING",
+        ...(isUserIdValid ? { userId } : { email })
+      };
+      const existing = await AdminQueue.findOne(existingQuery);
+      if (existing) {
+        return res.status(200).json(existing);
+      }
+    } catch (findError) {
+      console.log("Error finding existing record after 11000:", findError);
+    }
+  }
 
   res.status(500).json({
 
@@ -107,58 +140,105 @@ async (req, res) => {
 
 const approveUser =
 async (req, res) => {
-
   try {
-
-    await AdminQueue.findByIdAndUpdate(
+    const { adminNotes } = req.body;
+    const record = await AdminQueue.findByIdAndUpdate(
       req.params.id,
       {
-        adminDecision:
-          "APPROVED"
-      }
+        adminDecision: "APPROVED",
+        finalStatus: "APPROVED",
+        adminNotes: adminNotes || ""
+      },
+      { new: true }
     );
 
+    if (record && record.userId) {
+      await User.findByIdAndUpdate(record.userId, { isVerified: true });
+    }
+
     res.json({
-      success: true
+      success: true,
+      record
     });
 
   } catch (error) {
-
     res.status(500).json({
-      message:
-        "Failed to approve"
+      message: "Failed to approve",
+      error: error.message
     });
-
   }
-
 };
 
 const rejectUser =
 async (req, res) => {
-
   try {
+    const { adminNotes } = req.body;
+    if (!adminNotes) {
+      return res.status(400).json({ message: "Rejection reason is required." });
+    }
 
-    await AdminQueue.findByIdAndUpdate(
+    const record = await AdminQueue.findByIdAndUpdate(
       req.params.id,
       {
-        adminDecision:
-          "REJECTED"
-      }
+        adminDecision: "REJECTED",
+        finalStatus: "REJECTED",
+        adminNotes: adminNotes,
+        rejectionReason: adminNotes
+      },
+      { new: true }
     );
 
+    if (record && record.userId) {
+      await User.findByIdAndUpdate(record.userId, { isVerified: false });
+    }
+
     res.json({
-      success: true
+      success: true,
+      record
     });
 
   } catch (error) {
-
     res.status(500).json({
-      message:
-        "Failed to reject"
+      message: "Failed to reject",
+      error: error.message
+    });
+  }
+};
+
+const reuploadUser =
+async (req, res) => {
+  try {
+    const { adminNotes } = req.body;
+    if (!adminNotes) {
+      return res.status(400).json({ message: "Reason for re-upload is required." });
+    }
+
+    const record = await AdminQueue.findByIdAndUpdate(
+      req.params.id,
+      {
+        adminDecision: "REUPLOAD_REQUIRED",
+        finalStatus: "REUPLOAD_REQUIRED",
+        adminNotes: adminNotes,
+        reuploadReason: adminNotes
+      },
+      { new: true }
+    );
+
+    if (record && record.userId) {
+      await User.findByIdAndUpdate(record.userId, { isVerified: false });
+    }
+
+    res.json({
+      success: true,
+      record
     });
 
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to request re-upload",
+      error: error.message
+    });
   }
-
 };
 
 module.exports = {
@@ -166,5 +246,6 @@ module.exports = {
   getReviewQueue,
   getSingleQueueItem,
   approveUser,
-  rejectUser
+  rejectUser,
+  reuploadUser
 };
