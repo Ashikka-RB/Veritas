@@ -128,7 +128,9 @@ await User.findByIdAndUpdate(
     aadhaarGender: gender,
 
     aadhaarNumber:
-      aadhaarNumber
+      aadhaarNumber,
+
+    ocrCompletedAt: new Date()
 
   }
 

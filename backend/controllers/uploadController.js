@@ -14,7 +14,8 @@ const uploadAadhaar = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
-        aadhaarFile: filePath
+        aadhaarFile: filePath,
+        aadhaarUploadedAt: new Date()
       },
       {
         new: true
@@ -52,7 +53,8 @@ const uploadPan = async (req, res) => {
         userId,
 
         {
-          panFile: filePath
+          panFile: filePath,
+          panUploadedAt: new Date()
         },
 
         {

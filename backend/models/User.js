@@ -37,6 +37,21 @@ const userSchema = new mongoose.Schema({
     default: null
   },
 
+  aadhaarUploadedAt: {
+    type: Date,
+    default: null
+  },
+
+  ocrCompletedAt: {
+    type: Date,
+    default: null
+  },
+
+  panUploadedAt: {
+    type: Date,
+    default: null
+  },
+
   aadhaarFile: {
   type: String
 },

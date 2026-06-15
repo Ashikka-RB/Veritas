@@ -12,6 +12,33 @@ export default function Navbar({ type = "public", stepText, backTo }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (type !== "user") return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("http://localhost:8000/api/dashboard", {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.unreadCount !== undefined) {
+          setUnreadCount(data.unreadCount);
+        }
+      })
+      .catch(err => console.error("Error fetching navbar alerts:", err));
+  }, [type]);
+
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("faceMatchScore");
+    navigate('/');
+  };
+
   return (
     <nav className={`nav ${scrolled ? 'scrolled' : ''}`}>
       <span className="nav-logo" onClick={() => navigate('/')}>Veritas</span>
@@ -38,8 +65,10 @@ export default function Navbar({ type = "public", stepText, backTo }) {
             <span className={`nav-link ${location.pathname === '/security' ? 'active' : ''}`} onClick={() => navigate('/security')}>Security</span>
           </div>
           <div className="nav-actions">
-            <span className="badge badge-amber"><i className="ti ti-bell"></i> 2 alerts</span>
-            <button className="btn btn-outline" onClick={() => navigate('/')}>Sign Out</button>
+            <span className="badge badge-amber" onClick={() => navigate('/notifications')} style={{ cursor: 'pointer' }}>
+              <i className="ti ti-bell"></i> {unreadCount} alert{unreadCount !== 1 ? 's' : ''}
+            </span>
+            <button className="btn btn-outline" onClick={handleSignOut}>Sign Out</button>
           </div>
         </>
       )}
