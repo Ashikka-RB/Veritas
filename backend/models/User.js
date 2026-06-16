@@ -104,6 +104,22 @@ panDOB: {
     type: Date,
     default: null
   },
+  faceImage: {
+    type: String,
+    default: null
+  },
+  faceMatchScore: {
+    type: Number,
+    default: null
+  },
+  faceVerificationStatus: {
+    type: String,
+    default: null
+  },
+  faceVerificationTimestamp: {
+    type: Date,
+    default: null
+  },
 });
 
 

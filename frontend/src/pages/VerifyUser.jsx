@@ -7,6 +7,7 @@ export default function VerifyUser() {
   const { id } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
@@ -170,25 +171,49 @@ export default function VerifyUser() {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
             <div className="card">
-              <div style={{ fontSize: '13px', fontWeight: 500, marginBottom: '16px' }}>Uploaded Documents</div>
-              <div
-                className="doc-preview"
-                style={{ marginBottom: '12px', cursor: dbUser?.aadhaarFile ? 'pointer' : 'default' }}
-                onClick={() => dbUser?.aadhaarFile && window.open(`http://localhost:8000/${dbUser.aadhaarFile}`, '_blank')}
-              >
-                <i className="ti ti-id-badge" style={{ fontSize: '32px', color: 'var(--text4)' }}></i>
-                <div style={{ fontSize: '11px', color: 'var(--text3)' }}>
-                  {dbUser?.aadhaarFile ? dbUser.aadhaarFile.split('/').pop() : 'aadhaar_front.jpg'}
+              <div style={{ fontSize: '13px', fontWeight: 500, marginBottom: '16px' }}>Uploaded Documents & Verification Image</div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginTop: '12px' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text3)', marginBottom: '6px' }}>Aadhaar Card</div>
+                  {dbUser?.aadhaarFile ? (
+                    <img 
+                      src={`http://localhost:8000/${dbUser.aadhaarFile}`} 
+                      alt="Aadhaar" 
+                      style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '8px', border: '0.5px solid var(--border)', cursor: 'pointer' }}
+                      onClick={() => setPreviewImage(`http://localhost:8000/${dbUser.aadhaarFile}`)}
+                    />
+                  ) : (
+                    <div style={{ width: '100%', height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg2)', borderRadius: '8px', color: 'var(--text3)', fontSize: '11px' }}>Not Uploaded</div>
+                  )}
                 </div>
-              </div>
-              <div
-                className="doc-preview"
-                style={{ cursor: dbUser?.panFile ? 'pointer' : 'default' }}
-                onClick={() => dbUser?.panFile && window.open(`http://localhost:8000/${dbUser.panFile}`, '_blank')}
-              >
-                <i className="ti ti-credit-card" style={{ fontSize: '32px', color: 'var(--text4)' }}></i>
-                <div style={{ fontSize: '11px', color: 'var(--text3)' }}>
-                  {dbUser?.panFile ? dbUser.panFile.split('/').pop() : 'pan_card.jpg'}
+                
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text3)', marginBottom: '6px' }}>PAN Card</div>
+                  {dbUser?.panFile ? (
+                    <img 
+                      src={`http://localhost:8000/${dbUser.panFile}`} 
+                      alt="PAN" 
+                      style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '8px', border: '0.5px solid var(--border)', cursor: 'pointer' }}
+                      onClick={() => setPreviewImage(`http://localhost:8000/${dbUser.panFile}`)}
+                    />
+                  ) : (
+                    <div style={{ width: '100%', height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg2)', borderRadius: '8px', color: 'var(--text3)', fontSize: '11px' }}>Not Uploaded</div>
+                  )}
+                </div>
+
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text3)', marginBottom: '6px' }}>Captured Face</div>
+                  {dbUser?.faceImage ? (
+                    <img 
+                      src={`http://localhost:8000/${dbUser.faceImage}`} 
+                      alt="Webcam Face" 
+                      style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '8px', border: '0.5px solid var(--border)', cursor: 'pointer' }}
+                      onClick={() => setPreviewImage(`http://localhost:8000/${dbUser.faceImage}`)}
+                    />
+                  ) : (
+                    <div style={{ width: '100%', height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg2)', borderRadius: '8px', color: 'var(--text3)', fontSize: '11px' }}>Not Uploaded</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -328,6 +353,58 @@ export default function VerifyUser() {
           </div>
         </div>
       </div>
+      
+      {/* Premium Image Preview Modal */}
+      {previewImage && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(8,8,8,0.92)',
+            backdropFilter: 'blur(20px)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}
+          onClick={() => setPreviewImage(null)}
+        >
+          <img 
+            src={previewImage} 
+            alt="Preview" 
+            style={{ 
+              maxWidth: '90%', 
+              maxHeight: '90%', 
+              borderRadius: 'var(--r-lg)',
+              border: '0.5px solid var(--border3)',
+              boxShadow: '0 24px 48px rgba(0,0,0,0.6)',
+              objectFit: 'contain'
+            }} 
+          />
+          <button 
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              background: 'rgba(255,255,255,0.05)',
+              border: '0.5px solid var(--border2)',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              color: 'var(--text)',
+              fontSize: '18px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onClick={() => setPreviewImage(null)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 const axios = require("axios");
 const AdminQueue = require("../models/AdminQueue");
+const User = require("../models/User");
 const { logSecurityEvent } = require("../utils/auditLogger");
 
 const analyzeVerification = async (req, res) => {
@@ -53,7 +54,52 @@ const getVerificationStatus = async (req, res) => {
   }
 };
 
+const saveFaceVerification = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    if (!req.file) {
+      return res.status(400).json({ message: "No face image uploaded" });
+    }
+
+    const faceImage = req.file.path; // e.g. uploads/face/face_<userId>_<timestamp>.jpg
+    const faceMatchScore = req.body.faceMatchScore ? parseFloat(req.body.faceMatchScore) : 0;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      {
+        faceImage,
+        faceMatchScore,
+        faceVerificationStatus: "COMPLETED",
+        faceVerificationTimestamp: new Date()
+      },
+      { new: true }
+    );
+
+    // Log the persistent face verification image upload
+    await logSecurityEvent(
+      userId,
+      "FACE_VERIFICATION",
+      req,
+      "SUCCESS",
+      `Face verification webcam image persisted successfully. Match score: ${faceMatchScore}%`
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Face verification image saved successfully",
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error("Error saving face verification:", error);
+    res.status(500).json({
+      message: "Failed to save face verification",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   analyzeVerification,
-  getVerificationStatus
+  getVerificationStatus,
+  saveFaceVerification
 };

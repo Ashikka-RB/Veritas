@@ -19,7 +19,58 @@ export default function FaceVerification() {
   const [currentStep,setCurrentStep] =useState("blink");
   const [aadhaarImage,setAadhaarImage] = useState(null);
   const [aadhaarLoaded,setAadhaarLoaded] = useState(false);
-  
+  const [uploading, setUploading] = useState(false);
+
+  const uploadFaceImage = async (base64Image, score) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    setUploading(true);
+    setInstruction("Saving face biometric image...");
+
+    try {
+      // Convert base64 to Blob
+      const base64Parts = base64Image.split(',');
+      const mime = base64Parts[0].match(/:(.*?);/)[1];
+      const byteString = atob(base64Parts[1]);
+      const arrayBuffer = new ArrayBuffer(byteString.length);
+      const uint8Array = new Uint8Array(arrayBuffer);
+      
+      for (let i = 0; i < byteString.length; i++) {
+        uint8Array[i] = byteString.charCodeAt(i);
+      }
+      
+      const blob = new Blob([arrayBuffer], { type: mime });
+      const file = new File([blob], 'face.jpg', { type: mime });
+
+      const formData = new FormData();
+      formData.append('face', file);
+      formData.append('faceMatchScore', score);
+
+      const response = await fetch('http://localhost:8000/api/verification/face', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to persist face verification image');
+      }
+
+      console.log('Face verification image uploaded successfully.');
+      setInstruction("Verification complete!");
+      setDone(true);
+    } catch (err) {
+      console.error(err);
+      alert("Error saving webcam biometric: " + err.message);
+      setInstruction("Failed to save webcam scan");
+    } finally {
+      setUploading(false);
+      setRunning(false);
+    }
+  };
 
   useEffect(() => {
 
@@ -284,88 +335,44 @@ const detectFace =
         // capture selfie
         const imageSrc = webcamRef.current.getScreenshot();
         setCapturedImage(imageSrc);
-        
-        try {
-
-  // LOAD AADHAAR IMAGE
-  const aadhaarImg =
-    await faceapi.fetchImage(
-      aadhaarImage
-    );
-
-  // DETECT FACE IN AADHAAR
-  const aadhaarDetection =
-    await faceapi
-      .detectSingleFace(
-        aadhaarImg,
-        new faceapi
-          .TinyFaceDetectorOptions()
-      )
-      .withFaceLandmarks()
-      .withFaceDescriptor();
-
-  if (!aadhaarDetection) {
-
-    alert(
-      "No face found in Aadhaar image"
-    );
-
-    return;
-
-  }
-
-  // LIVE SELFIE DESCRIPTOR
-  const selfieDescriptor =
-    detection.descriptor;
-
-  // AADHAAR DESCRIPTOR
-  const aadhaarDescriptor =
-    aadhaarDetection.descriptor;
-
-  // COMPARE
-  const distance =
-    faceapi.euclideanDistance(
-      selfieDescriptor,
-      aadhaarDescriptor
-    );
-
-  console.log(
-    "Distance:",
-    distance
-  );
-
-  // CONVERT TO %
-  const similarity =
-    Math.max(
-      0,
-      Math.round(
-        (1 - distance) * 100
-      )
-    );
-
-  console.log(
-    "Similarity:",
-    similarity
-  );
-
-  setMatchScore(
-    similarity
-  );
-
-  localStorage.setItem(
-  "faceMatchScore",
-  similarity
-);
-
-} catch (err) {
-
-  console.log(err);
-
-}
-        
-        setDone(true);
-        setRunning(false);
         stepRef.current = "done";
+        
+        let similarity = 0;
+        try {
+          // LOAD AADHAAR IMAGE
+          const aadhaarImg = await faceapi.fetchImage(aadhaarImage);
+
+          // DETECT FACE IN AADHAAR
+          const aadhaarDetection = await faceapi
+            .detectSingleFace(
+              aadhaarImg,
+              new faceapi.TinyFaceDetectorOptions()
+            )
+            .withFaceLandmarks()
+            .withFaceDescriptor();
+
+          if (!aadhaarDetection) {
+            alert("No face found in Aadhaar image");
+            setRunning(false);
+            return;
+          }
+
+          // COMPARE
+          const selfieDescriptor = detection.descriptor;
+          const aadhaarDescriptor = aadhaarDetection.descriptor;
+          const distance = faceapi.euclideanDistance(
+            selfieDescriptor,
+            aadhaarDescriptor
+          );
+
+          similarity = Math.max(0, Math.round((1 - distance) * 100));
+          setMatchScore(similarity);
+          localStorage.setItem("faceMatchScore", similarity);
+        } catch (err) {
+          console.log("Error matching face descriptor:", err);
+        }
+        
+        await uploadFaceImage(imageSrc, similarity);
       }
     }
 };
@@ -604,13 +611,13 @@ const startVerification = async () => {
   className="btn btn-gold"
   style={{ flex: 1 }}
   onClick={startVerification}
-  disabled={running}
+  disabled={running || uploading}
 >
 
   {
 
-    running
-      ? 'Verifying'
+    running || uploading
+      ? (uploading ? 'Saving Scan...' : 'Verifying...')
       : 'Start Liveness Check'
 
   }

@@ -8,6 +8,7 @@ export default function Status() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [previewImage, setPreviewImage] = useState(null);
 
   const fetchStatusAndNotifications = async () => {
     const token = localStorage.getItem('token');
@@ -283,6 +284,30 @@ export default function Status() {
           </div>
         </div>
 
+        {/* Face Verification Section */}
+        {status?.faceImage && (
+          <div className="card" style={{ marginBottom: '20px' }}>
+            <div style={{ fontSize: '15px', fontWeight: 500, marginBottom: '16px' }}>Face Verification Details</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <img 
+                src={`http://localhost:8000/${status.faceImage}`} 
+                alt="Captured Face" 
+                style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '0.5px solid var(--border)', cursor: 'pointer' }}
+                onClick={() => setPreviewImage(`http://localhost:8000/${status.faceImage}`)}
+              />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '14px', fontWeight: 500 }}>Live Selfie Biometric</div>
+                <div style={{ fontSize: '12px', color: 'var(--text3)', marginTop: '4px' }}>
+                  Captured: {new Date(status.faceVerificationTimestamp).toLocaleString()}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--green)', fontWeight: 500, marginTop: '4px' }}>
+                  Similarity Confidence: {faceMatch}% Match
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Recent Notifications Panel */}
         <div className="card" style={{ marginBottom: '20px', padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -322,6 +347,58 @@ export default function Status() {
 
         <button className="btn btn-outline btn-full" onClick={() => navigate('/dashboard')}>Back to Dashboard</button>
       </div>
+
+      {/* Premium Image Preview Modal */}
+      {previewImage && (
+        <div 
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(8,8,8,0.92)',
+            backdropFilter: 'blur(20px)',
+            zIndex: 1000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}
+          onClick={() => setPreviewImage(null)}
+        >
+          <img 
+            src={previewImage} 
+            alt="Preview" 
+            style={{ 
+              maxWidth: '90%', 
+              maxHeight: '90%', 
+              borderRadius: 'var(--r-lg)',
+              border: '0.5px solid var(--border3)',
+              boxShadow: '0 24px 48px rgba(0,0,0,0.6)',
+              objectFit: 'contain'
+            }} 
+          />
+          <button 
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              background: 'rgba(255,255,255,0.05)',
+              border: '0.5px solid var(--border2)',
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              color: 'var(--text)',
+              fontSize: '18px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onClick={() => setPreviewImage(null)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }
