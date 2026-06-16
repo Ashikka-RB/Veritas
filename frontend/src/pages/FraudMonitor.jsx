@@ -8,7 +8,12 @@ export default function FraudMonitor() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/admin/review-queue')
+    const token = localStorage.getItem('adminToken');
+    fetch('http://localhost:8000/api/admin/review-queue', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error('Failed to fetch review queue');
@@ -27,8 +32,14 @@ export default function FraudMonitor() {
 
   const handleBlock = async (id) => {
     try {
+      const token = localStorage.getItem('adminToken');
       await fetch(`http://localhost:8000/api/admin/reject/${id}`, {
-        method: 'PUT',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ adminNotes: 'High fraud risk flagged from Fraud Monitor' })
       });
       // Refresh local state
       setQueue((prev) => prev.filter((item) => item._id !== id));

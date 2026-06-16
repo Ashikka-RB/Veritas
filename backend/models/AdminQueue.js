@@ -60,6 +60,10 @@ new mongoose.Schema({
   submittedAt: {
     type: Date,
     default: Date.now
+  },
+  decidedAt: {
+    type: Date,
+    default: null
   }
 
 });

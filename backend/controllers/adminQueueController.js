@@ -147,13 +147,14 @@ async (req, res) => {
       {
         adminDecision: "APPROVED",
         finalStatus: "APPROVED",
-        adminNotes: adminNotes || ""
+        adminNotes: adminNotes || "",
+        decidedAt: new Date()
       },
       { new: true }
     );
 
     if (record && record.userId) {
-      await User.findByIdAndUpdate(record.userId, { isVerified: true });
+      await User.findByIdAndUpdate(record.userId, { isVerified: true, isLocked: false });
     }
 
     res.json({
@@ -183,13 +184,14 @@ async (req, res) => {
         adminDecision: "REJECTED",
         finalStatus: "REJECTED",
         adminNotes: adminNotes,
-        rejectionReason: adminNotes
+        rejectionReason: adminNotes,
+        decidedAt: new Date()
       },
       { new: true }
     );
 
     if (record && record.userId) {
-      await User.findByIdAndUpdate(record.userId, { isVerified: false });
+      await User.findByIdAndUpdate(record.userId, { isVerified: false, isLocked: true });
     }
 
     res.json({
@@ -219,13 +221,14 @@ async (req, res) => {
         adminDecision: "REUPLOAD_REQUIRED",
         finalStatus: "REUPLOAD_REQUIRED",
         adminNotes: adminNotes,
-        reuploadReason: adminNotes
+        reuploadReason: adminNotes,
+        decidedAt: new Date()
       },
       { new: true }
     );
 
     if (record && record.userId) {
-      await User.findByIdAndUpdate(record.userId, { isVerified: false });
+      await User.findByIdAndUpdate(record.userId, { isVerified: false, isLocked: false });
     }
 
     res.json({
@@ -241,11 +244,44 @@ async (req, res) => {
   }
 };
 
+const flagFraudUser =
+async (req, res) => {
+  try {
+    const { adminNotes } = req.body;
+    const record = await AdminQueue.findByIdAndUpdate(
+      req.params.id,
+      {
+        adminDecision: "FLAGGED",
+        finalStatus: "FLAGGED",
+        adminNotes: adminNotes || "Flagged as fraud",
+        decidedAt: new Date()
+      },
+      { new: true }
+    );
+
+    if (record && record.userId) {
+      await User.findByIdAndUpdate(record.userId, { isVerified: false, isLocked: true });
+    }
+
+    res.json({
+      success: true,
+      record
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to flag fraud",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   submitToQueue,
   getReviewQueue,
   getSingleQueueItem,
   approveUser,
   rejectUser,
-  reuploadUser
+  reuploadUser,
+  flagFraudUser
 };

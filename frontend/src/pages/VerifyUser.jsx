@@ -9,7 +9,12 @@ export default function VerifyUser() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/admin/review-item/${id}`)
+    const token = localStorage.getItem('adminToken');
+    fetch(`http://localhost:8000/api/admin/review-item/${id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error('Failed to fetch verification details');
@@ -38,10 +43,12 @@ export default function VerifyUser() {
   const approveUserRecord = async () => {
     if (!queue?._id) return;
     try {
+      const token = localStorage.getItem('adminToken');
       await fetch(`http://localhost:8000/api/admin/approve/${queue._id}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ adminNotes: notes })
       });
@@ -58,10 +65,12 @@ export default function VerifyUser() {
       return;
     }
     try {
+      const token = localStorage.getItem('adminToken');
       await fetch(`http://localhost:8000/api/admin/reject/${queue._id}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ adminNotes: notes })
       });
@@ -78,10 +87,12 @@ export default function VerifyUser() {
       return;
     }
     try {
+      const token = localStorage.getItem('adminToken');
       await fetch(`http://localhost:8000/api/admin/reupload/${queue._id}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ adminNotes: notes })
       });

@@ -74,6 +74,7 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const ocrRoutes = require("./routes/ocrRoutes");
 const authRoutes = require("./routes/authRoutes");
 const adminQueueRoutes = require("./routes/adminQueueRoutes");
+const adminAnalyticsRoutes = require("./routes/adminAnalyticsRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const protect = require("./middleware/authMiddleware");
@@ -118,6 +119,8 @@ app.use("/api/ocr", ocrRoutes);
 app.use("/api/verification",verificationRoutes);
 
 app.use("/api/admin",adminQueueRoutes);
+
+app.use("/api/admin/analytics", adminAnalyticsRoutes);
 
 app.use("/api", dashboardRoutes);
 

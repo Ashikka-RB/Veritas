@@ -8,7 +8,12 @@ export default function AdminSidebar() {
   const isActive = (path) => location.pathname.startsWith(path) ? 'active' : '';
 
   const handleVerifyUsersClick = () => {
-    fetch('http://localhost:8000/api/admin/review-queue')
+    const token = localStorage.getItem('adminToken');
+    fetch('http://localhost:8000/api/admin/review-queue', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
       .then((res) => {
         if (!res.ok) {
           throw new Error('Failed to fetch review queue');
@@ -29,6 +34,12 @@ export default function AdminSidebar() {
       });
   };
 
+  const handleSignOut = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    navigate('/admin/login');
+  };
+
   return (
     <div className="sidebar">
       <div className="sidebar-logo">Veritas Admin</div>
@@ -46,7 +57,7 @@ export default function AdminSidebar() {
       </div>
       
       <div className="sidebar-label">System</div>
-      <div className="sidebar-item" onClick={() => navigate('/')}><i className="ti ti-logout"></i> Sign Out</div>
+      <div className="sidebar-item" onClick={handleSignOut}><i className="ti ti-logout"></i> Sign Out</div>
     </div>
   );
 }

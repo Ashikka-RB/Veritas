@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import { useEffect } from 'react';
 import Lenis from 'lenis';
 
@@ -78,9 +79,30 @@ function App() {
         <Route path="/verify/status" element={<Status />} />
 
         <Route path="/admin/login" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/verify-user/:id" element={<VerifyUser />} />
-        <Route path="/admin/fraud" element={<FraudMonitor />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedAdminRoute>
+              <AdminDashboard />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/admin/verify-user/:id"
+          element={
+            <ProtectedAdminRoute>
+              <VerifyUser />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/admin/fraud"
+          element={
+            <ProtectedAdminRoute>
+              <FraudMonitor />
+            </ProtectedAdminRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

@@ -89,9 +89,13 @@ panDOB: {
   type: String
 },
 
-panNumber: {
+  panNumber: {
   type: String
 },
+  isLocked: {
+    type: Boolean,
+    default: false
+  },
 });
 
 
