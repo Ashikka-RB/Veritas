@@ -96,6 +96,14 @@ panDOB: {
     type: Boolean,
     default: false
   },
+  resetPasswordToken: {
+    type: String,
+    default: null
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null
+  },
 });
 
 
