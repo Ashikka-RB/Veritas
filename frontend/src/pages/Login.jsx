@@ -103,7 +103,6 @@ export default function Login() {
             {loading ? "Signing In..." : "Sign In"}
             <i className="ti ti-arrow-right"></i>
           </button>
-          <div style={{ marginTop: '10px' }}><button className="btn btn-outline btn-full" onClick={() => navigate('/dashboard')}>Demo: Skip to Dashboard →</button></div>
           <div className="auth-switch">New to Veritas? <a onClick={() => navigate('/register')}>Create account</a></div>
         </div>
         <div className="auth-visual">

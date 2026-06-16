@@ -120,6 +120,15 @@ panDOB: {
     type: Date,
     default: null
   },
+  kycStatus: {
+    type: String,
+    enum: ["pending", "under_review", "approved", "rejected"],
+    default: "pending"
+  },
+  rejectionReason: {
+    type: String,
+    default: null
+  },
 });
 
 

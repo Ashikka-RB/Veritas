@@ -61,6 +61,14 @@ const saveFaceVerification = async (req, res) => {
       return res.status(400).json({ message: "No face image uploaded" });
     }
 
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (user.kycStatus === "rejected" || user.kycStatus === "approved") {
+      return res.status(400).json({ message: "KYC already completed or rejected." });
+    }
+
     const faceImage = req.file.path; // e.g. uploads/face/face_<userId>_<timestamp>.jpg
     const faceMatchScore = req.body.faceMatchScore ? parseFloat(req.body.faceMatchScore) : 0;
 

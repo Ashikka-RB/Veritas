@@ -30,16 +30,14 @@ const getKycData = async (userId) => {
 
   // 2. Verification Status
   let verificationStatus = "Pending";
-  if (latestQueue) {
-    if (latestQueue.adminDecision === "APPROVED") {
-      verificationStatus = "Approved";
-    } else if (latestQueue.adminDecision === "REJECTED") {
-      verificationStatus = "Rejected";
-    } else if (latestQueue.adminDecision === "REUPLOAD_REQUIRED") {
-      verificationStatus = "Action Required";
-    } else if (latestQueue.adminDecision === "PENDING") {
-      verificationStatus = "Under Review";
-    }
+  if (user.kycStatus === "approved") {
+    verificationStatus = "Approved";
+  } else if (user.kycStatus === "rejected") {
+    verificationStatus = "Rejected";
+  } else if (user.kycStatus === "under_review") {
+    verificationStatus = "Under Review";
+  } else if (latestQueue && latestQueue.adminDecision === "REUPLOAD_REQUIRED") {
+    verificationStatus = "Action Required";
   } else if (user.aadhaarFile || user.panFile) {
     verificationStatus = "In Progress";
   }
@@ -197,6 +195,8 @@ const getKycData = async (userId) => {
   return {
     fullName: user.fullName,
     verificationStatus,
+    kycStatus: user.kycStatus || "pending",
+    rejectionReason: user.rejectionReason || null,
     fraudRiskScore,
     riskCategory,
     currentStep,
@@ -216,6 +216,8 @@ const getDashboardData = async (req, res) => {
     res.json({
       fullName: data.fullName,
       verificationStatus: data.verificationStatus,
+      kycStatus: data.kycStatus,
+      rejectionReason: data.rejectionReason,
       fraudRiskScore: data.fraudRiskScore,
       riskCategory: data.riskCategory,
       currentStep: data.currentStep,
@@ -282,16 +284,14 @@ const getKycStatus = async (req, res) => {
 
     // Verification Status
     let verificationStatus = "Pending";
-    if (latestQueue) {
-      if (latestQueue.adminDecision === "APPROVED") {
-        verificationStatus = "Approved";
-      } else if (latestQueue.adminDecision === "REJECTED") {
-        verificationStatus = "Rejected";
-      } else if (latestQueue.adminDecision === "REUPLOAD_REQUIRED") {
-        verificationStatus = "Action Required";
-      } else if (latestQueue.adminDecision === "PENDING") {
-        verificationStatus = "Under Review";
-      }
+    if (user.kycStatus === "approved") {
+      verificationStatus = "Approved";
+    } else if (user.kycStatus === "rejected") {
+      verificationStatus = "Rejected";
+    } else if (user.kycStatus === "under_review") {
+      verificationStatus = "Under Review";
+    } else if (latestQueue && latestQueue.adminDecision === "REUPLOAD_REQUIRED") {
+      verificationStatus = "Action Required";
     } else if (user.aadhaarFile || user.panFile) {
       verificationStatus = "In Progress";
     }
@@ -405,6 +405,8 @@ const getKycStatus = async (req, res) => {
       userId: user._id,
       fullName: user.fullName,
       verificationStatus,
+      kycStatus: user.kycStatus || "pending",
+      rejectionReason: user.rejectionReason || null,
       currentStep: currentStepKey,
       ocrScore: latestQueue ? latestQueue.ocrConfidence : null,
       faceMatchScore: user.faceMatchScore || (latestQueue ? latestQueue.faceMatchScore : null),
@@ -415,7 +417,6 @@ const getKycStatus = async (req, res) => {
       estimatedTime,
       timeline,
       adminNotes: latestQueue ? latestQueue.adminNotes : null,
-      rejectionReason: latestQueue ? latestQueue.rejectionReason : null,
       reuploadReason: latestQueue ? latestQueue.reuploadReason : null,
       rejectedProbability: latestQueue ? latestQueue.rejectedProbability : null
     });
@@ -447,16 +448,14 @@ const getKycProcess = async (req, res) => {
 
     // Overall Status
     let status = "Pending";
-    if (latestQueue) {
-      if (latestQueue.adminDecision === "APPROVED") {
-        status = "Approved";
-      } else if (latestQueue.adminDecision === "REJECTED") {
-        status = "Rejected";
-      } else if (latestQueue.adminDecision === "REUPLOAD_REQUIRED") {
-        status = "Action Required";
-      } else if (latestQueue.adminDecision === "PENDING") {
-        status = "Under Review";
-      }
+    if (user.kycStatus === "approved") {
+      status = "Approved";
+    } else if (user.kycStatus === "rejected") {
+      status = "Rejected";
+    } else if (user.kycStatus === "under_review") {
+      status = "Under Review";
+    } else if (latestQueue && latestQueue.adminDecision === "REUPLOAD_REQUIRED") {
+      status = "Action Required";
     } else if (user.aadhaarFile || user.panFile) {
       status = "In Progress";
     }
@@ -560,6 +559,8 @@ const getKycProcess = async (req, res) => {
     res.status(200).json({
       currentStep,
       status,
+      kycStatus: user.kycStatus || "pending",
+      rejectionReason: user.rejectionReason || null,
       aadhaarUploaded,
       ocrCompleted,
       panUploaded,
@@ -567,7 +568,6 @@ const getKycProcess = async (req, res) => {
       adminReviewStarted,
       steps,
       adminNotes: latestQueue ? latestQueue.adminNotes : null,
-      rejectionReason: latestQueue ? latestQueue.rejectionReason : null,
       reuploadReason: latestQueue ? latestQueue.reuploadReason : null
     });
 

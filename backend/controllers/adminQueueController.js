@@ -10,6 +10,13 @@ async (req, res) => {
     const { userId, email } = req.body;
 
     const isUserIdValid = userId && mongoose.Types.ObjectId.isValid(userId);
+    if (isUserIdValid) {
+      const user = await User.findById(userId);
+      if (user && (user.kycStatus === "rejected" || user.kycStatus === "approved")) {
+        return res.status(400).json({ message: "KYC already finalized." });
+      }
+    }
+
     const existingQuery = {
       adminDecision: "PENDING",
       ...(isUserIdValid ? { userId } : { email })
@@ -28,6 +35,7 @@ async (req, res) => {
     console.log("ADMINQUEUE DOCUMENT SAVED IN MONGODB:", item);
     
     if (item.userId) {
+      await User.findByIdAndUpdate(item.userId, { kycStatus: "under_review" });
       await logSecurityEvent(item.userId, "ADMIN_REVIEW_SUBMISSION", req, "SUCCESS", "Application submitted to admin review queue");
     }
 
@@ -159,7 +167,7 @@ async (req, res) => {
     );
 
     if (record && record.userId) {
-      await User.findByIdAndUpdate(record.userId, { isVerified: true, isLocked: false });
+      await User.findByIdAndUpdate(record.userId, { kycStatus: "approved", isLocked: false });
       await logSecurityEvent(record.userId, "ADMIN_DECISION", req, "SUCCESS", `KYC approved by administrator. Notes: ${adminNotes || "None"}`);
     }
 
@@ -197,7 +205,7 @@ async (req, res) => {
     );
 
     if (record && record.userId) {
-      await User.findByIdAndUpdate(record.userId, { isVerified: false, isLocked: true });
+      await User.findByIdAndUpdate(record.userId, { kycStatus: "rejected", rejectionReason: adminNotes, isLocked: false });
       await logSecurityEvent(record.userId, "ADMIN_DECISION", req, "SUCCESS", `KYC rejected by administrator. Reason: ${adminNotes}`);
     }
 
@@ -235,7 +243,7 @@ async (req, res) => {
     );
 
     if (record && record.userId) {
-      await User.findByIdAndUpdate(record.userId, { isVerified: false, isLocked: false });
+      await User.findByIdAndUpdate(record.userId, { kycStatus: "pending", isLocked: false });
       await logSecurityEvent(record.userId, "ADMIN_DECISION", req, "SUCCESS", `Re-upload requested by administrator. Reason: ${adminNotes}`);
     }
 
@@ -268,7 +276,7 @@ async (req, res) => {
     );
 
     if (record && record.userId) {
-      await User.findByIdAndUpdate(record.userId, { isVerified: false, isLocked: true });
+      await User.findByIdAndUpdate(record.userId, { kycStatus: "rejected", rejectionReason: adminNotes || "Flagged as fraud", isLocked: true });
       await logSecurityEvent(record.userId, "ADMIN_DECISION", req, "SUCCESS", `KYC flagged as fraud by administrator. Notes: ${adminNotes || "Flagged as fraud"}`);
     }
 

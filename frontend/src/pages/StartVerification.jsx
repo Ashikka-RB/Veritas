@@ -109,6 +109,7 @@ export default function StartVerification() {
   };
 
   const handleStepClick = (step) => {
+    if (processData?.status === 'Rejected' || processData?.status === 'Approved') return;
     if (step.status === 'Not Started') return;
     
     if (step.id === 1) navigate('/verify/aadhaar');
@@ -158,8 +159,8 @@ export default function StartVerification() {
       }
       if (status === 'Rejected') {
         return {
-          text: "Restart Verification",
-          onClick: () => navigate('/verify/aadhaar')
+          text: "Go to Dashboard",
+          onClick: () => navigate('/dashboard')
         };
       }
       if (status === 'Action Required') {

@@ -187,6 +187,55 @@ export default function Dashboard() {
 
         <div className="dash-grid">
           <div className="dash-main">
+            {/* Status Alert Banners */}
+            {(data.kycStatus === 'pending' || data.kycStatus === 'under_review') && (
+              <div className="card" style={{ background: 'var(--bg3)', borderLeft: '4px solid var(--gold)', padding: '20px', borderRadius: 'var(--r-lg)', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px', borderTop: '0.5px solid var(--border)', borderRight: '0.5px solid var(--border)', borderBottom: '0.5px solid var(--border)' }}>
+                <div style={{ background: 'var(--amber-dim)', color: 'var(--gold)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <i className="ti ti-clock" style={{ fontSize: '20px' }}></i>
+                </div>
+                <div>
+                  <div style={{ fontSize: '15px', fontWeight: 500, fontFamily: 'var(--display)', color: 'var(--gold)', letterSpacing: '0.5px' }}>Verification Under Review</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text3)', marginTop: '4px', lineHeight: 1.6 }}>Your verification is under review. We are currently checking your uploaded documents.</div>
+                </div>
+              </div>
+            )}
+
+            {data.kycStatus === 'approved' && (
+              <div className="card" style={{ background: 'var(--bg3)', borderLeft: '4px solid var(--green)', padding: '20px', borderRadius: 'var(--r-lg)', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px', borderTop: '0.5px solid var(--border)', borderRight: '0.5px solid var(--border)', borderBottom: '0.5px solid var(--border)' }}>
+                <div style={{ background: 'var(--green-dim)', color: 'var(--green)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <i className="ti ti-circle-check" style={{ fontSize: '20px' }}></i>
+                </div>
+                <div>
+                  <div style={{ fontSize: '15px', fontWeight: 500, fontFamily: 'var(--display)', color: 'var(--green)', letterSpacing: '0.5px' }}>KYC Approved</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text3)', marginTop: '4px', lineHeight: 1.6 }}>Your eKYC has been successfully approved! You now have full access to the platform services.</div>
+                </div>
+              </div>
+            )}
+
+            {data.kycStatus === 'rejected' && (
+              <div className="card" style={{ background: 'var(--bg3)', borderLeft: '4px solid var(--red)', padding: '20px', borderRadius: 'var(--r-lg)', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '14px', borderTop: '0.5px solid var(--border)', borderRight: '0.5px solid var(--border)', borderBottom: '0.5px solid var(--border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ background: 'var(--red-dim)', color: 'var(--red)', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <i className="ti ti-circle-x" style={{ fontSize: '20px' }}></i>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '15px', fontWeight: 500, fontFamily: 'var(--display)', color: 'var(--red)', letterSpacing: '0.5px' }}>Verification Failed</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text3)', marginTop: '4px', lineHeight: 1.6 }}>Unfortunately, your identity verification was rejected by our compliance team.</div>
+                  </div>
+                </div>
+                {data.rejectionReason && (
+                  <div style={{ background: 'var(--bg2)', border: '0.5px solid var(--border)', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', marginLeft: '56px', lineHeight: 1.6 }}>
+                    <span style={{ fontWeight: 500, color: 'var(--text2)', display: 'block', marginBottom: '4px', textTransform: 'uppercase', fontSize: '10px', letterSpacing: '0.5px' }}>Rejection Reason:</span>
+                    <span style={{ color: 'var(--text3)' }}>{data.rejectionReason}</span>
+                  </div>
+                )}
+                <div style={{ marginLeft: '56px', fontSize: '12px', color: 'var(--text3)' }}>
+                  <span style={{ fontWeight: 500, color: 'var(--text2)' }}>Status:</span>
+                  <span className="badge badge-red" style={{ marginLeft: '6px' }}>Rejected</span>
+                </div>
+              </div>
+            )}
+
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px', marginBottom: '20px' }}>
               <div className="card card-sm">
                 <div className="stat-label">Verification Status</div>

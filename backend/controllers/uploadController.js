@@ -5,11 +5,16 @@ const uploadAadhaar = async (req, res) => {
   try {
     // logged in user id from JWT
     const userId = req.user.id;
-
-    // uploaded file path
     const filePath = req.file.path;
 
-    // update user in DB
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (user.kycStatus === "rejected" || user.kycStatus === "approved") {
+      return res.status(400).json({ message: "KYC already completed or rejected." });
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
@@ -41,6 +46,14 @@ const uploadPan = async (req, res) => {
   try {
     const userId = req.user.id;
     const filePath = req.file.path;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (user.kycStatus === "rejected" || user.kycStatus === "approved") {
+      return res.status(400).json({ message: "KYC already completed or rejected." });
+    }
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,

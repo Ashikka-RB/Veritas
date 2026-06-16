@@ -69,16 +69,79 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/security" element={<SecurityLogs />} />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <Notifications />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/security"
+          element={
+            <ProtectedRoute>
+              <SecurityLogs />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/verify/start" element={<StartVerification />} />
-        <Route path="/verify/aadhaar" element={<AadhaarUpload />} />
-        <Route path="/verify/ocr" element={<OcrReview />} />
-        <Route path="/verify/pan" element={<PanUpload />} />
-        <Route path="/verify/face" element={<FaceVerification />} />
-        <Route path="/verify/processing" element={<Processing />} />
-        <Route path="/verify/status" element={<Status />} />
+        <Route
+          path="/verify/start"
+          element={
+            <ProtectedRoute>
+              <StartVerification />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/verify/aadhaar"
+          element={
+            <ProtectedRoute>
+              <AadhaarUpload />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/verify/ocr"
+          element={
+            <ProtectedRoute>
+              <OcrReview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/verify/pan"
+          element={
+            <ProtectedRoute>
+              <PanUpload />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/verify/face"
+          element={
+            <ProtectedRoute>
+              <FaceVerification />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/verify/processing"
+          element={
+            <ProtectedRoute>
+              <Processing />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/verify/status"
+          element={
+            <ProtectedRoute>
+              <Status />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route
