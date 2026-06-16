@@ -51,6 +51,7 @@ async (score) => {
 
   try {
 
+    const token = localStorage.getItem("token");
     const response =
       await fetch(
         "http://localhost:8000/api/verification/analyze",
@@ -58,22 +59,16 @@ async (score) => {
           method: "POST",
 
           headers: {
-            "Content-Type":
-              "application/json"
+            "Content-Type": "application/json",
+            ...(token ? { "Authorization": `Bearer ${token}` } : {})
           },
 
           body: JSON.stringify({
-
             faceMatch: score,
-
             panMatched: true,
-
             livenessPassed: true,
-
             ocrConfidence: 94
-
           })
-
         }
       );
 

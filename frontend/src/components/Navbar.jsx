@@ -31,7 +31,18 @@ export default function Navbar({ type = "public", stepText, backTo }) {
       .catch(err => console.error("Error fetching navbar alerts:", err));
   }, [type]);
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        await fetch("http://localhost:8000/api/auth/logout", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } catch (err) {
+        console.error("Logout request failed:", err);
+      }
+    }
     localStorage.removeItem("token");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userId");

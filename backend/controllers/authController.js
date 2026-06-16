@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const { logSecurityEvent, registerDevice } = require("../utils/auditLogger");
 
 // Nodemailer Transporter Configuration
 const transporter = nodemailer.createTransport({
@@ -15,13 +16,13 @@ const transporter = nodemailer.createTransport({
 
 const registerUser = async (req, res) => {
   try {
-
     const { fullName, email, phone, password } = req.body;
 
     // check if user already exists
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
+      await logSecurityEvent(null, "ACCOUNT_CREATION", req, "FAILED", `Registration failed: email ${email} already exists`);
       return res.status(400).json({
         message: "User already exists"
       });
@@ -47,6 +48,9 @@ const registerUser = async (req, res) => {
 
     // save user to database
     await user.save();
+
+    // Log Account Creation Success
+    await logSecurityEvent(user._id, "ACCOUNT_CREATION", req, "SUCCESS", "Account registered successfully (pending OTP verification)");
 
     // Send OTP email via Nodemailer
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
@@ -76,15 +80,12 @@ const registerUser = async (req, res) => {
     });
 
   } catch (error) {
-
     console.log(error);
-
     res.status(500).json({
       message: "Server Error"
     });
   }
 };
-
 
 const loginUser = async (req, res) => {
   try {
@@ -94,12 +95,14 @@ const loginUser = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
+      await logSecurityEvent(null, "LOGIN_FAILURE", req, "FAILED", `Login failed: user not found with email ${email}`);
       return res.status(404).json({
         message: "User not found"
       });
     }
 
     if (!user.isVerified) {
+      await logSecurityEvent(user._id, "LOGIN_FAILURE", req, "FAILED", `Login failed: account with email ${email} is unverified`);
       return res.status(400).json({
         message: "Please verify your email first."
       });
@@ -109,6 +112,7 @@ const loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
+      await logSecurityEvent(user._id, "LOGIN_FAILURE", req, "FAILED", "Login failed: incorrect password");
       return res.status(400).json({
         message: "Invalid credentials"
       });
@@ -125,6 +129,10 @@ const loginUser = async (req, res) => {
       }
     );
 
+    // Log Successful Login & Register Device
+    await logSecurityEvent(user._id, "LOGIN_SUCCESS", req, "SUCCESS", "User logged in successfully");
+    await registerDevice(user._id, req);
+
     res.status(200).json({
       message: "Login successful",
       token
@@ -132,36 +140,22 @@ const loginUser = async (req, res) => {
 
   } catch (error) {
     console.log(error);
-
     res.status(500).json({
       message: "Server Error"
     });
   }
 };
 
-const getProfile =
-  async (req, res) => {
-
-    try {
-
-      const user =
-        await User.findById(
-          req.user.id
-        ).select("-password");
-
-      res.status(200).json(user);
-
-    } catch (error) {
-
-      console.log(error);
-
-      res.status(500).json({
-        message:
-          "Server Error"
-      });
-
-    }
-
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Server Error"
+    });
+  }
 };
 
 const sendOtp = async (req, res) => {
@@ -218,12 +212,14 @@ const verifyOtp = async (req, res) => {
     }
 
     if (!user.otp || user.otp !== otp) {
+      await logSecurityEvent(user._id, "LOGIN_FAILURE", req, "FAILED", "OTP verification failed: invalid code");
       return res.status(400).json({
         message: "Invalid OTP code"
       });
     }
 
     if (new Date() > user.otpExpiry) {
+      await logSecurityEvent(user._id, "LOGIN_FAILURE", req, "FAILED", "OTP verification failed: code expired");
       return res.status(400).json({
         message: "OTP has expired"
       });
@@ -243,6 +239,10 @@ const verifyOtp = async (req, res) => {
         expiresIn: "7d"
       }
     );
+
+    // Log Successful verification and register device
+    await logSecurityEvent(user._id, "LOGIN_SUCCESS", req, "SUCCESS", "Email verified & logged in via OTP verification");
+    await registerDevice(user._id, req);
 
     res.status(200).json({
       message: "Email verified successfully",
@@ -271,6 +271,7 @@ const forgotPassword = async (req, res) => {
     // This prevents attackers from guessing registered emails.
     if (!user) {
       console.log(`[forgot-password] Request received for non-existent email: ${email}`);
+      await logSecurityEvent(null, "PASSWORD_RESET_REQUEST", req, "FAILED", `Password reset requested for non-existent email: ${email}`);
       return res.status(200).json({
         success: true,
         message: "If this email exists, a reset link has been sent."
@@ -284,6 +285,9 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordToken = token;
     user.resetPasswordExpires = expires;
     await user.save();
+
+    // Log Password Reset Request
+    await logSecurityEvent(user._id, "PASSWORD_RESET_REQUEST", req, "SUCCESS", `Password reset link generated for email: ${email}`);
 
     // Send reset email
     const resetUrl = `http://localhost:5173/reset-password?token=${token}`;
@@ -351,6 +355,9 @@ const resetPassword = async (req, res) => {
 
     console.log(`[reset-password] Password successfully reset for user: ${user.email}`);
 
+    // Log Password Change success
+    await logSecurityEvent(user._id, "PASSWORD_CHANGE", req, "SUCCESS", "Password changed successfully via reset token");
+
     res.status(200).json({
       success: true,
       message: "Password has been reset successfully."
@@ -365,6 +372,24 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const logoutUser = async (req, res) => {
+  try {
+    if (req.user && req.user.id) {
+      await logSecurityEvent(req.user.id, "LOGOUT", req, "SUCCESS", "User logged out");
+    }
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully"
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({
+      message: "Server Error",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -372,5 +397,6 @@ module.exports = {
   sendOtp,
   verifyOtp,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  logoutUser
 };

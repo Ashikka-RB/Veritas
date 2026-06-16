@@ -5,64 +5,116 @@ import Navbar from '../components/Navbar';
 export default function Status() {
   const navigate = useNavigate();
   const [status, setStatus] = useState(null);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    const userId = localStorage.getItem('userId');
-    if (!userId) {
-      setLoading(false);
+  const fetchStatusAndNotifications = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
       return;
     }
 
-    fetch(`http://localhost:8000/api/verification/status/${userId}`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to fetch status');
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setStatus(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+    try {
+      const headers = {
+        'Authorization': `Bearer ${token}`
+      };
+
+      const [resStatus, resNotif] = await Promise.all([
+        fetch('http://localhost:8000/api/kyc/status', { headers }),
+        fetch('http://localhost:8000/api/notifications', { headers })
+      ]);
+
+      if (resStatus.status === 401 || resNotif.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        navigate('/login');
+        return;
+      }
+
+      if (!resStatus.ok || !resNotif.ok) {
+        throw new Error('Failed to retrieve your KYC status data.');
+      }
+
+      const dataStatus = await resStatus.json();
+      const dataNotif = await resNotif.json();
+
+      setStatus(dataStatus);
+      setNotifications(dataNotif);
+      setLoading(false);
+      setError('');
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStatusAndNotifications();
+
+    // Auto-refresh status every 30 seconds
+    const interval = setInterval(fetchStatusAndNotifications, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  const getFraudRiskLabel = (score) => {
-    if (score === undefined || score === null) return '—';
-    if (score < 30) return 'Low';
-    if (score <= 70) return 'Medium';
-    return 'High';
+  const getFraudRiskColor = (risk) => {
+    if (risk === 'Low') return 'var(--green)';
+    if (risk === 'Medium') return 'var(--amber)';
+    if (risk === 'High') return 'var(--red)';
+    return 'var(--text)';
   };
 
-  const getFraudRiskColor = (score) => {
-    if (score === undefined || score === null) return 'var(--text)';
-    if (score < 30) return 'var(--green)';
-    if (score <= 70) return 'var(--amber)';
-    return 'var(--red)';
-  };
+  // Remaining steps calculation
+  const stepsList = ['AADHAAR', 'OCR', 'PAN', 'FACE', 'REVIEW', 'COMPLETED'];
+  const currentStepIdx = status ? stepsList.indexOf(status.currentStep) : 0;
+  const remainingStepsCount = currentStepIdx >= 0 ? Math.max(0, 5 - currentStepIdx) : 0;
 
   if (loading) {
     return (
       <div className="page active" id="p-status">
         <Navbar type="back" backTo="/dashboard" />
-        <div className="container-md pt-nav" style={{ paddingTop: '96px', paddingBottom: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-          <div style={{ textAlign: 'center' }}>
-            <i className="ti ti-loader spin" style={{ fontSize: '32px', color: 'var(--gold)', display: 'block', margin: '0 auto 16px' }}></i>
-            <div style={{ fontSize: '14px', color: 'var(--text3)' }}>Loading verification status...</div>
+        <div className="container-md pt-nav" style={{ paddingTop: '96px', paddingBottom: '60px' }}>
+          
+          {/* Skeleton Hero */}
+          <div className="status-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+            <div className="skeleton" style={{ width: '150px', height: '24px', borderRadius: '12px' }}></div>
+            <div className="skeleton" style={{ width: '250px', height: '36px' }}></div>
+            <div className="skeleton" style={{ width: '180px', height: '14px' }}></div>
           </div>
+
+          {/* Skeleton Timeline */}
+          <div className="card" style={{ marginBottom: '20px' }}>
+            <div className="skeleton skeleton-title" style={{ marginBottom: '20px' }}></div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                  <div className="skeleton" style={{ width: '12px', height: '12px', borderRadius: '50%' }}></div>
+                  <div className="skeleton skeleton-text" style={{ width: '60%' }}></div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Skeleton Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+            {Array.from({ length: 3 }).map((_, idx) => (
+              <div key={idx} className="card card-sm" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                <div className="skeleton skeleton-text" style={{ width: '50%' }}></div>
+                <div className="skeleton" style={{ width: '40px', height: '20px' }}></div>
+              </div>
+            ))}
+          </div>
+
         </div>
       </div>
     );
   }
 
-  // Fallback if no submission exists yet
-  const decision = status?.adminDecision || 'PENDING';
+  const decision = status?.adminReviewStatus || 'Pending';
   const faceMatch = status?.faceMatchScore || 0;
-  const ocrScore = status?.ocrConfidence || 0;
+  const ocrScore = status?.ocrScore || 0;
   const rejectedProb = status?.rejectedProbability || 0;
 
   return (
@@ -70,6 +122,19 @@ export default function Status() {
       <Navbar type="back" backTo="/dashboard" />
       <div className="container-md pt-nav" style={{ paddingTop: '96px', paddingBottom: '60px' }}>
         
+        {/* Error Callout */}
+        {error && (
+          <div className="lock-warning" style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <i className="ti ti-alert-circle" style={{ marginRight: '8px' }}></i>
+              Error: {error}
+            </div>
+            <button className="btn btn-gold btn-outline" style={{ padding: '4px 12px', fontSize: '11px' }} onClick={fetchStatusAndNotifications}>
+              Retry
+            </button>
+          </div>
+        )}
+
         {/* Status Hero Section */}
         <div className="status-hero">
           {decision === 'APPROVED' ? (
@@ -77,7 +142,9 @@ export default function Status() {
               <div className="status-badge-lg" style={{ background: 'var(--green-dim)', color: 'var(--green)', border: '0.5px solid rgba(76,175,80,0.25)' }}>
                 <i className="ti ti-circle-check"></i> Verification Approved
               </div>
-              <h1 style={{ fontFamily: 'var(--display)', fontSize: '36px', fontWeight: 400, marginBottom: '8px' }}>Your identity has<br/>been verified</h1>
+              <h1 style={{ fontFamily: 'var(--display)', fontSize: '36px', fontWeight: 400, marginBottom: '8px' }}>
+                Hey {status.fullName},<br/>your identity is verified
+              </h1>
               <p style={{ color: 'var(--text2)', fontSize: '14px', marginBottom: '16px' }}>You have successfully completed the eKYC process.</p>
               {status?.adminNotes && (
                 <div className="card" style={{ maxWidth: '500px', margin: '16px auto 0', textAlign: 'left', background: 'var(--bg3)', border: '0.5px solid var(--border)' }}>
@@ -91,7 +158,9 @@ export default function Status() {
               <div className="status-badge-lg" style={{ background: 'var(--red-dim)', color: 'var(--red)', border: '0.5px solid rgba(226,75,74,0.25)' }}>
                 <i className="ti ti-circle-x"></i> Verification Rejected
               </div>
-              <h1 style={{ fontFamily: 'var(--display)', fontSize: '36px', fontWeight: 400, marginBottom: '8px' }}>Verification failed</h1>
+              <h1 style={{ fontFamily: 'var(--display)', fontSize: '36px', fontWeight: 400, marginBottom: '8px' }}>
+                Verification failed
+              </h1>
               <p style={{ color: 'var(--text2)', fontSize: '14px', marginBottom: '16px' }}>Your submission did not pass our verification criteria.</p>
               {status?.rejectionReason && (
                 <div className="card" style={{ maxWidth: '500px', margin: '16px auto 0', textAlign: 'left', background: 'var(--bg3)', border: '0.5px solid var(--red)' }}>
@@ -105,7 +174,9 @@ export default function Status() {
               <div className="status-badge-lg" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', border: '0.5px solid rgba(232,160,48,0.25)' }}>
                 <i className="ti ti-alert-circle"></i> Action Required
               </div>
-              <h1 style={{ fontFamily: 'var(--display)', fontSize: '36px', fontWeight: 400, marginBottom: '8px' }}>Please Re-upload Documents</h1>
+              <h1 style={{ fontFamily: 'var(--display)', fontSize: '36px', fontWeight: 400, marginBottom: '8px' }}>
+                Please Re-upload Documents
+              </h1>
               <p style={{ color: 'var(--text2)', fontSize: '14px', marginBottom: '16px' }}>The admin has requested that you re-submit your documents.</p>
               {status?.reuploadReason && (
                 <div className="card" style={{ maxWidth: '500px', margin: '16px auto 16px', textAlign: 'left', background: 'var(--bg3)', border: '0.5px solid var(--amber)' }}>
@@ -124,10 +195,14 @@ export default function Status() {
           ) : (
             <>
               <div className="status-badge-lg" style={{ background: 'var(--amber-dim)', color: 'var(--amber)', border: '0.5px solid rgba(232,160,48,0.25)' }}>
-                <i className="ti ti-clock"></i> Admin Review Pending
+                <i className="ti ti-clock"></i> Verification Status: {status.verificationStatus}
               </div>
-              <h1 style={{ fontFamily: 'var(--display)', fontSize: '36px', fontWeight: 400, marginBottom: '8px' }}>Your submission is<br/>under review</h1>
-              <p style={{ color: 'var(--text2)', fontSize: '14px' }}>Estimated: 5–10 business minutes</p>
+              <h1 style={{ fontFamily: 'var(--display)', fontSize: '36px', fontWeight: 400, marginBottom: '8px' }}>
+                Hey {status.fullName},<br/>status check
+              </h1>
+              <div style={{ fontSize: '12px', color: 'var(--text3)', marginTop: '4px' }}>
+                Current Step: <strong style={{ color: 'var(--gold)' }}>{status.currentStep}</strong> · {remainingStepsCount} step{remainingStepsCount !== 1 ? 's' : ''} remaining
+              </div>
             </>
           )}
         </div>
@@ -136,34 +211,51 @@ export default function Status() {
         <div className="card" style={{ marginBottom: '20px' }}>
           <div style={{ fontSize: '15px', fontWeight: 500, marginBottom: '20px' }}>Verification Timeline</div>
           <div className="timeline">
-            <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ Registration &amp; OTP Verified</div></div>
-            <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ Aadhaar Uploaded &amp; Validated</div></div>
-            <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ OCR Extraction — {ocrScore}% confidence</div></div>
-            <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ PAN Validated — Names Match</div></div>
-            <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ Face Verification Passed — {faceMatch}%</div></div>
-            <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ Fraud Analysis — {rejectedProb}% Risk ({getFraudRiskLabel(rejectedProb)} Risk)</div></div>
-            
-            {decision === 'APPROVED' ? (
-              <>
-                <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ Admin Review Completed</div></div>
-                <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ Verification Approved</div></div>
-              </>
-            ) : decision === 'REJECTED' ? (
-              <>
-                <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ Admin Review Completed</div></div>
-                <div className="tl-item"><div className="tl-dot active" style={{ background: 'var(--red)' }}></div><div className="tl-title" style={{ color: 'var(--red)' }}>✖ Verification Rejected</div></div>
-              </>
-            ) : decision === 'REUPLOAD_REQUIRED' ? (
-              <>
-                <div className="tl-item"><div className="tl-dot done"></div><div className="tl-title">✔ Admin Review Completed</div></div>
-                <div className="tl-item"><div className="tl-dot active" style={{ background: 'var(--amber)' }}></div><div className="tl-title" style={{ color: 'var(--amber)' }}>⚠ Re-upload Required</div></div>
-              </>
-            ) : (
-              <>
-                <div className="tl-item"><div className="tl-dot active"></div><div className="tl-title" style={{ color: 'var(--gold)' }}>⏳ Admin Review in Progress</div><div className="tl-sub" style={{ color: 'var(--amber)' }}>Est. 5–10 minutes</div></div>
-                <div className="tl-item"><div className="tl-dot pending"></div><div className="tl-title" style={{ color: 'var(--text3)' }}>Final Approval / Rejection</div><div className="tl-sub">Pending</div></div>
-              </>
-            )}
+            {status.timeline.map((item, idx) => {
+              const isCompleted = item.status === 'Completed';
+              const isInProgress = item.status === 'In Progress';
+              
+              let dotClass = 'tl-dot pending';
+              if (isCompleted) dotClass = 'tl-dot done';
+              else if (isInProgress) dotClass = 'tl-dot active';
+
+              if (item.step === 'Admin Review' && decision === 'REJECTED') {
+                dotClass = 'tl-dot active';
+              }
+
+              const formattedTime = item.completedAt 
+                ? new Date(item.completedAt).toLocaleString() 
+                : '';
+
+              return (
+                <div className="tl-item" key={idx}>
+                  <div className={dotClass} style={{
+                    background: (item.step === 'Admin Review' && decision === 'REJECTED') 
+                      ? 'var(--red)' 
+                      : (item.step === 'Admin Review' && decision === 'REUPLOAD_REQUIRED')
+                      ? 'var(--amber)'
+                      : undefined
+                  }}></div>
+                  <div style={{ flex: 1 }}>
+                    <div className="tl-title" style={{
+                      color: (item.step === 'Admin Review' && decision === 'REJECTED')
+                        ? 'var(--red)'
+                        : (item.step === 'Admin Review' && decision === 'REUPLOAD_REQUIRED')
+                        ? 'var(--amber)'
+                        : (isInProgress ? 'var(--gold)' : undefined)
+                    }}>
+                      {item.step}
+                    </div>
+                    {formattedTime && <div className="tl-sub" style={{ fontSize: '10px', color: 'var(--text3)' }}>{formattedTime}</div>}
+                    {!isCompleted && isInProgress && (
+                      <div className="tl-sub" style={{ color: 'var(--amber)' }}>
+                        {status.estimatedTime ? `Est. duration: ${status.estimatedTime}` : 'In progress'}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -175,22 +267,62 @@ export default function Status() {
               {faceMatch ? `${faceMatch}%` : '—'}
             </div>
           </div>
+          
           <div className="card card-sm" style={{ textAlign: 'center' }}>
             <div className="stat-label">OCR Score</div>
             <div style={{ color: 'var(--green)', fontWeight: 600, fontSize: '18px' }}>
               {ocrScore ? `${ocrScore}%` : '—'}
             </div>
           </div>
+
           <div className="card card-sm" style={{ textAlign: 'center' }}>
             <div className="stat-label">Fraud Risk</div>
-            <div style={{ color: getFraudRiskColor(rejectedProb), fontWeight: 600, fontSize: '18px' }}>
-              {getFraudRiskLabel(rejectedProb)}
+            <div style={{ color: getFraudRiskColor(status.fraudRisk), fontWeight: 600, fontSize: '18px' }}>
+              {status.fraudRisk || '—'}
             </div>
           </div>
         </div>
-        
-        <button className="btn btn-outline btn-full" onClick={() => navigate('/notifications')}>View All Notifications</button>
+
+        {/* Recent Notifications Panel */}
+        <div className="card" style={{ marginBottom: '20px', padding: '16px 20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ fontSize: '15px', fontWeight: 500 }}>Recent Notifications</div>
+            <span className="badge badge-gray">{notifications.length} Total</span>
+          </div>
+          {notifications.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '12px', color: 'var(--text3)', fontSize: '13px' }}>
+              No notifications.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {notifications.slice(0, 3).map((notif) => (
+                <div key={notif.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', paddingBottom: '12px', borderBottom: '0.5px solid var(--border)' }}>
+                  <span className={notif.badgeClass} style={{ fontSize: '9px', padding: '2px 6px', marginTop: '2px' }}>
+                    {notif.type}
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text)' }}>{notif.title}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text3)', marginTop: '2px' }}>{notif.message}</div>
+                    <div style={{ fontSize: '9px', color: 'var(--text4)', marginTop: '4px' }}>
+                      {new Date(notif.timestamp).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <button 
+            className="btn btn-ghost btn-full" 
+            style={{ marginTop: '12px', fontSize: '12px' }}
+            onClick={() => navigate('/notifications')}
+          >
+            View All Notifications →
+          </button>
+        </div>
+
+        <button className="btn btn-outline btn-full" onClick={() => navigate('/dashboard')}>Back to Dashboard</button>
       </div>
     </div>
   );
 }
+

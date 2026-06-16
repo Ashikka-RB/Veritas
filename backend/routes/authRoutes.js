@@ -9,7 +9,8 @@ const {
   sendOtp,
   verifyOtp,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  logoutUser
 } = require("../controllers/authController");
 
 const authMiddleware =
@@ -18,6 +19,8 @@ const authMiddleware =
 router.post("/register", registerUser);
 
 router.post("/login", loginUser);
+
+router.post("/logout", authMiddleware, logoutUser);
 
 router.post("/send-otp", sendOtp);
 

@@ -1,5 +1,7 @@
 const Tesseract = require("tesseract.js");
 const User = require("../models/User");
+const { logSecurityEvent } = require("../utils/auditLogger");
+
 
 const extractAadhaarData = async (req, res) => {
 
@@ -136,6 +138,9 @@ await User.findByIdAndUpdate(
 
 );
 
+    // Log Aadhaar OCR Completion
+    await logSecurityEvent(userId, "OCR_COMPLETION", req, "SUCCESS", "Aadhaar OCR data extracted and validated successfully");
+
     res.status(200).json({
   message: "OCR Extraction Success",
 
@@ -266,6 +271,9 @@ await User.findByIdAndUpdate(
     panNumber:panNumber
   }
 );
+
+      // Log PAN OCR Completion
+      await logSecurityEvent(userId, "OCR_COMPLETION", req, "SUCCESS", "PAN OCR data extracted and validated successfully");
 
       res.status(200).json({
 

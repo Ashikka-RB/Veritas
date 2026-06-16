@@ -1,6 +1,6 @@
-const AdminQueue =
-require("../models/AdminQueue");
+const AdminQueue = require("../models/AdminQueue");
 const User = require("../models/User");
+const { logSecurityEvent } = require("../utils/auditLogger");
 
 const submitToQueue =
 async (req, res) => {
@@ -26,6 +26,11 @@ async (req, res) => {
         req.body
       );
     console.log("ADMINQUEUE DOCUMENT SAVED IN MONGODB:", item);
+    
+    if (item.userId) {
+      await logSecurityEvent(item.userId, "ADMIN_REVIEW_SUBMISSION", req, "SUCCESS", "Application submitted to admin review queue");
+    }
+
     res.status(201).json(item);
 
   } catch (error) {
@@ -155,6 +160,7 @@ async (req, res) => {
 
     if (record && record.userId) {
       await User.findByIdAndUpdate(record.userId, { isVerified: true, isLocked: false });
+      await logSecurityEvent(record.userId, "ADMIN_DECISION", req, "SUCCESS", `KYC approved by administrator. Notes: ${adminNotes || "None"}`);
     }
 
     res.json({
@@ -192,6 +198,7 @@ async (req, res) => {
 
     if (record && record.userId) {
       await User.findByIdAndUpdate(record.userId, { isVerified: false, isLocked: true });
+      await logSecurityEvent(record.userId, "ADMIN_DECISION", req, "SUCCESS", `KYC rejected by administrator. Reason: ${adminNotes}`);
     }
 
     res.json({
@@ -229,6 +236,7 @@ async (req, res) => {
 
     if (record && record.userId) {
       await User.findByIdAndUpdate(record.userId, { isVerified: false, isLocked: false });
+      await logSecurityEvent(record.userId, "ADMIN_DECISION", req, "SUCCESS", `Re-upload requested by administrator. Reason: ${adminNotes}`);
     }
 
     res.json({
@@ -261,6 +269,7 @@ async (req, res) => {
 
     if (record && record.userId) {
       await User.findByIdAndUpdate(record.userId, { isVerified: false, isLocked: true });
+      await logSecurityEvent(record.userId, "ADMIN_DECISION", req, "SUCCESS", `KYC flagged as fraud by administrator. Notes: ${adminNotes || "Flagged as fraud"}`);
     }
 
     res.json({
