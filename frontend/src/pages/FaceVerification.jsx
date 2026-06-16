@@ -56,7 +56,8 @@ export default function FaceVerification() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to persist face verification image');
+        const errData = await response.json();
+        throw new Error(errData.error || errData.message || 'Failed to persist face verification image');
       }
 
       console.log('Face verification image uploaded successfully.');
@@ -196,8 +197,9 @@ useEffect(() => {
           data.aadhaarFile
         ) {
 
-          const imageUrl =
-            `http://localhost:8000/${data.aadhaarFile}`;
+          const imageUrl = data.aadhaarFile.startsWith('http://') || data.aadhaarFile.startsWith('https://')
+            ? data.aadhaarFile
+            : `http://localhost:8000/${data.aadhaarFile}`;
 
           console.log(
             "AADHAAR URL:",

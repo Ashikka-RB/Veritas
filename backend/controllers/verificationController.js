@@ -57,19 +57,30 @@ const getVerificationStatus = async (req, res) => {
 const saveFaceVerification = async (req, res) => {
   try {
     const userId = req.user.id;
+    console.log("saveFaceVerification controller invoked for user:", userId);
+
     if (!req.file) {
-      return res.status(400).json({ message: "No face image uploaded" });
+      console.error("saveFaceVerification failed: req.file is undefined");
+      return res.status(400).json({ success: false, message: "No face image uploaded", error: "No face image uploaded" });
     }
+
+    console.log("saveFaceVerification file details:", {
+      path: req.file.path,
+      fieldname: req.file.fieldname,
+      originalname: req.file.originalname
+    });
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      console.error("saveFaceVerification failed: User not found in DB");
+      return res.status(404).json({ success: false, message: "User not found", error: "User not found" });
     }
     if (user.kycStatus === "rejected" || user.kycStatus === "approved") {
-      return res.status(400).json({ message: "KYC already completed or rejected." });
+      console.error("saveFaceVerification failed: KYC is already approved or rejected. kycStatus:", user.kycStatus);
+      return res.status(400).json({ success: false, message: "KYC already completed or rejected.", error: "KYC already completed or rejected." });
     }
 
-    const faceImage = req.file.path; // e.g. uploads/face/face_<userId>_<timestamp>.jpg
+    const faceImage = req.file.path; // e.g. Cloudinary URL
     const faceMatchScore = req.body.faceMatchScore ? parseFloat(req.body.faceMatchScore) : 0;
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -92,16 +103,19 @@ const saveFaceVerification = async (req, res) => {
       `Face verification webcam image persisted successfully. Match score: ${faceMatchScore}%`
     );
 
+    console.log("saveFaceVerification successfully saved face image URL to DB.");
+
     res.status(200).json({
       success: true,
       message: "Face verification image saved successfully",
       user: updatedUser
     });
   } catch (error) {
-    console.error("Error saving face verification:", error);
+    console.error("UPLOAD ERROR:", error);
     res.status(500).json({
-      message: "Failed to save face verification",
-      error: error.message
+      success: false,
+      error: error.message,
+      stack: process.env.NODE_ENV === "development" ? error.stack : undefined
     });
   }
 };

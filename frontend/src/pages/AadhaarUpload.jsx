@@ -80,18 +80,13 @@ const ocrResponse =
     navigate('/verify/ocr');
   }, 2000);
 
-} else {
-
-      alert(data.message);
-
+    } else {
+      alert(data.error || data.message || "Upload Failed");
     }
 
   } catch (error) {
-
     console.log(error);
-
-    alert("Upload Failed");
-
+    alert(error.message || "Upload Failed");
   } finally {
 
     setLoading(false);

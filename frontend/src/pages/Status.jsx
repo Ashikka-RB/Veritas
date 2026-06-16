@@ -2,6 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
+const getImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  return `http://localhost:8000/${path}`;
+};
+
 export default function Status() {
   const navigate = useNavigate();
   const [status, setStatus] = useState(null);
@@ -9,6 +17,7 @@ export default function Status() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [previewImage, setPreviewImage] = useState(null);
+
 
   const fetchStatusAndNotifications = async () => {
     const token = localStorage.getItem('token');
@@ -290,10 +299,10 @@ export default function Status() {
             <div style={{ fontSize: '15px', fontWeight: 500, marginBottom: '16px' }}>Face Verification Details</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
               <img 
-                src={`http://localhost:8000/${status.faceImage}`} 
+                src={getImageUrl(status.faceImage)} 
                 alt="Captured Face" 
                 style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: '0.5px solid var(--border)', cursor: 'pointer' }}
-                onClick={() => setPreviewImage(`http://localhost:8000/${status.faceImage}`)}
+                onClick={() => setPreviewImage(getImageUrl(status.faceImage))}
               />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '14px', fontWeight: 500 }}>Live Selfie Biometric</div>

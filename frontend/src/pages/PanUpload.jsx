@@ -74,39 +74,40 @@ const handlePanUpload =
       );
 
       // upload PAN
-      await fetch(
-
+      const uploadResponse = await fetch(
         "http://localhost:8000/api/upload/pan",
-
         {
           method: "POST",
-
           headers: {
-            Authorization:
-              `Bearer ${token}`
+            Authorization: `Bearer ${token}`
           },
-
           body: formData
         }
-
       );
 
-      // OCR request
-      const ocrResponse =
-  await fetch(
-    "http://localhost:8000/api/ocr/pan",
-    {
-      method: "POST",
-      headers: {
-        Authorization:
-          `Bearer ${token}`
-      },
-      body: formData
-    }
-  );
+      if (!uploadResponse.ok) {
+        const uploadErrData = await uploadResponse.json();
+        throw new Error(uploadErrData.error || uploadErrData.message || "Upload Failed");
+      }
 
-      const ocrData =
-        await ocrResponse.json();
+      // OCR request
+      const ocrResponse = await fetch(
+        "http://localhost:8000/api/ocr/pan",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          body: formData
+        }
+      );
+
+      if (!ocrResponse.ok) {
+        const ocrErrData = await ocrResponse.json();
+        throw new Error(ocrErrData.error || ocrErrData.message || "OCR Extraction Failed");
+      }
+
+      const ocrData = await ocrResponse.json();
 
       console.log(ocrData);
 
@@ -117,9 +118,8 @@ const handlePanUpload =
       setUploaded(true);
 
     } catch (error) {
-
       console.log(error);
-
+      alert(error.message || "PAN Verification Failed");
     }
 
 };

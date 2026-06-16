@@ -2,6 +2,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 
+const getImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  return `http://localhost:8000/${path}`;
+};
+
 export default function VerifyUser() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -178,10 +186,10 @@ export default function VerifyUser() {
                   <div style={{ fontSize: '11px', color: 'var(--text3)', marginBottom: '6px' }}>Aadhaar Card</div>
                   {dbUser?.aadhaarFile ? (
                     <img 
-                      src={`http://localhost:8000/${dbUser.aadhaarFile}`} 
+                      src={getImageUrl(dbUser.aadhaarFile)} 
                       alt="Aadhaar" 
                       style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '8px', border: '0.5px solid var(--border)', cursor: 'pointer' }}
-                      onClick={() => setPreviewImage(`http://localhost:8000/${dbUser.aadhaarFile}`)}
+                      onClick={() => setPreviewImage(getImageUrl(dbUser.aadhaarFile))}
                     />
                   ) : (
                     <div style={{ width: '100%', height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg2)', borderRadius: '8px', color: 'var(--text3)', fontSize: '11px' }}>Not Uploaded</div>
@@ -192,10 +200,10 @@ export default function VerifyUser() {
                   <div style={{ fontSize: '11px', color: 'var(--text3)', marginBottom: '6px' }}>PAN Card</div>
                   {dbUser?.panFile ? (
                     <img 
-                      src={`http://localhost:8000/${dbUser.panFile}`} 
+                      src={getImageUrl(dbUser.panFile)} 
                       alt="PAN" 
                       style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '8px', border: '0.5px solid var(--border)', cursor: 'pointer' }}
-                      onClick={() => setPreviewImage(`http://localhost:8000/${dbUser.panFile}`)}
+                      onClick={() => setPreviewImage(getImageUrl(dbUser.panFile))}
                     />
                   ) : (
                     <div style={{ width: '100%', height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg2)', borderRadius: '8px', color: 'var(--text3)', fontSize: '11px' }}>Not Uploaded</div>
@@ -206,10 +214,10 @@ export default function VerifyUser() {
                   <div style={{ fontSize: '11px', color: 'var(--text3)', marginBottom: '6px' }}>Captured Face</div>
                   {dbUser?.faceImage ? (
                     <img 
-                      src={`http://localhost:8000/${dbUser.faceImage}`} 
+                      src={getImageUrl(dbUser.faceImage)} 
                       alt="Webcam Face" 
                       style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '8px', border: '0.5px solid var(--border)', cursor: 'pointer' }}
-                      onClick={() => setPreviewImage(`http://localhost:8000/${dbUser.faceImage}`)}
+                      onClick={() => setPreviewImage(getImageUrl(dbUser.faceImage))}
                     />
                   ) : (
                     <div style={{ width: '100%', height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg2)', borderRadius: '8px', color: 'var(--text3)', fontSize: '11px' }}>Not Uploaded</div>
@@ -217,6 +225,7 @@ export default function VerifyUser() {
                 </div>
               </div>
             </div>
+
             <div className="card">
               <div style={{ fontSize: '13px', fontWeight: 500, marginBottom: '16px' }}>OCR Extracted Details</div>
               <div style={{ background: 'var(--bg3)', borderRadius: 'var(--r)', overflow: 'hidden' }}>
