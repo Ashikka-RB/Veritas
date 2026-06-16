@@ -602,10 +602,6 @@ const startVerification = async () => {
           <div style={{ fontSize: '11px', color: 'var(--text3)', marginTop: '8px' }}>Comparing with Aadhaar card photo</div>
         </div>
 
-        <div style={{ background: 'var(--amber-dim)', border: '0.5px solid rgba(232,160,48,0.2)', borderRadius: '8px', padding: '12px 14px', fontSize: '12px', color: 'var(--amber)', marginBottom: '24px' }}>
-          <i className="ti ti-alert-triangle"></i> 3 failed attempts will lock verification for 24 hours. Attempts remaining: <strong>3</strong>
-        </div>
-
         {!done ? (
           <div style={{ display: 'flex', gap: '12px' }}>
 
