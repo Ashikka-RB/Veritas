@@ -1,15 +1,21 @@
-# Veritas eKYC
-### A Full-Stack Onboarding and Identity Verification Simulation
+<h1 align="center">Veritas eKYC</h1>
+<p align="center"><strong>A Full-Stack Onboarding and Identity Verification Simulation</strong></p>
+
+<p align="center">
+  <img src="frontend/public/assets/dashboard_preview.png" alt="Veritas eKYC Dashboard Preview" width="850"/>
+</p>
+
+<p align="center">
+  <a href="https://react.dev/"><img src="https://img.shields.io/badge/Frontend-React%20%2F%20Vite-61DAFB?style=for-the-badge&logo=react" alt="React"/></a>
+  <a href="https://expressjs.com/"><img src="https://img.shields.io/badge/Backend-Express.js-000000?style=for-the-badge&logo=express" alt="Express"/></a>
+  <a href="https://www.mongodb.com/atlas"><img src="https://img.shields.io/badge/Database-MongoDB%20Atlas-47A248?style=for-the-badge&logo=mongodb" alt="MongoDB"/></a>
+  <a href="https://scikit-learn.org/"><img src="https://img.shields.io/badge/ML-Scikit--Learn-F7931E?style=for-the-badge&logo=scikitlearn" alt="Scikit-Learn"/></a>
+  <a href="https://cloudinary.com/"><img src="https://img.shields.io/badge/Storage-Cloudinary-3448C5?style=for-the-badge&logo=cloudinary" alt="Cloudinary"/></a>
+  <img src="https://img.shields.io/badge/OCR-Tesseract.js-563D7C?style=for-the-badge" alt="Tesseract.js"/>
+  <img src="https://img.shields.io/badge/Biometrics-Face--Api.js-FF6F61?style=for-the-badge" alt="face-api.js"/>
+</p>
 
 Veritas eKYC is a student-level full-stack web application designed to simulate a digital identity verification and user onboarding workflow. It provides user registration, email OTP verification, document upload (Aadhaar and PAN), optical character recognition (OCR) text extraction, client-side face comparison, and a basic machine learning service to categorize submission risk. It also features an admin panel for reviewing applications and managing statuses.
-
-[![React](https://img.shields.io/badge/Frontend-React%20%2F%20Vite-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
-[![Express](https://img.shields.io/badge/Backend-Express.js-000000?style=for-the-badge&logo=express)](https://expressjs.com/)
-[![MongoDB](https://img.shields.io/badge/Database-MongoDB%20Atlas-47A248?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/atlas)
-[![Scikit-Learn](https://img.shields.io/badge/ML-Scikit--Learn-F7931E?style=for-the-badge&logo=scikitlearn)](https://scikit-learn.org/)
-[![Cloudinary](https://img.shields.io/badge/Storage-Cloudinary-3448C5?style=for-the-badge&logo=cloudinary)](https://cloudinary.com/)
-[![Tesseract.js](https://img.shields.io/badge/OCR-Tesseract.js-563D7C?style=for-the-badge)](https://github.com/naptha/tesseract.js)
-[![face-api.js](https://img.shields.io/badge/Biometrics-Face--Api.js-FF6F61?style=for-the-badge)](https://github.com/justadudewhohacks/face-api.js)
 
 ---
 
