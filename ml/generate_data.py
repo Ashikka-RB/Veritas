@@ -5,9 +5,7 @@ data = []
 
 for i in range(1000):
 
-    # Most users are genuine
-
-    faceMatch = random.randint(40, 100)
+    faceMatch = random.randint(20, 100)
 
     panMatched = random.choices(
         [1, 0],
@@ -21,29 +19,24 @@ for i in range(1000):
 
     ocrConfidence = random.randint(60, 100)
 
-    # REJECTED
-
+    # HIGH RISK / REJECTED
     if (
-        faceMatch < 50
-        or panMatched == 0
-        or livenessPassed == 0
+        livenessPassed == 0
+        or faceMatch < 40
+        or (faceMatch < 55 and panMatched == 0)
     ):
-
         status = 2
 
-    # MANUAL REVIEW
-
+    # MEDIUM RISK / MANUAL REVIEW
     elif (
-        faceMatch < 80
-        or ocrConfidence < 80
+        panMatched == 0
+        or faceMatch < 70
+        or ocrConfidence < 70
     ):
-
         status = 1
 
-    # APPROVED
-
+    # LOW RISK / APPROVED
     else:
-
         status = 0
 
     data.append([
@@ -74,6 +67,4 @@ print("1000 records generated successfully")
 
 print("\nStatus Distribution:\n")
 
-print(
-    df["status"].value_counts()
-)
+print(df["status"].value_counts())

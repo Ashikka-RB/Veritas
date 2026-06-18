@@ -120,6 +120,14 @@ panDOB: {
     type: Date,
     default: null
   },
+  ocrConfidence: {
+    type: Number,
+    default: null
+  },
+  livenessPassed: {
+    type: Boolean,
+    default: false
+  },
   kycStatus: {
     type: String,
     enum: ["pending", "under_review", "approved", "rejected"],

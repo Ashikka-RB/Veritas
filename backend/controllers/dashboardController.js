@@ -42,13 +42,28 @@ const getKycData = async (userId) => {
     verificationStatus = "In Progress";
   }
 
-  // 3. Fraud Risk Score & Category
-  const fraudRiskScore = latestQueue && latestQueue.rejectedProbability !== undefined ? latestQueue.rejectedProbability : null;
+  // 3. Fraud Risk Score & Category (mapped to highest probability class)
+  let fraudRiskScore = null;
   let riskCategory = "—";
-  if (fraudRiskScore !== null) {
-    if (fraudRiskScore <= 30) riskCategory = "Low";
-    else if (fraudRiskScore <= 70) riskCategory = "Medium";
-    else riskCategory = "High";
+  if (latestQueue) {
+    const app = latestQueue.approvedProbability || 0;
+    const rev = latestQueue.manualReviewProbability || 0;
+    const rej = latestQueue.rejectedProbability || 0;
+
+    let max = app;
+    riskCategory = "Low";
+    fraudRiskScore = app;
+
+    if (rev > max) {
+      max = rev;
+      riskCategory = "Medium";
+      fraudRiskScore = rev;
+    }
+    if (rej > max) {
+      max = rej;
+      riskCategory = "High";
+      fraudRiskScore = rej;
+    }
   }
 
   // 4. Estimated Time
@@ -88,7 +103,7 @@ const getKycData = async (userId) => {
     notifications.push({
       id: "notif-3",
       title: "OCR Extraction Completed",
-      message: `Aadhaar OCR data extracted successfully with ${latestQueue ? latestQueue.ocrConfidence || 94 : 94}% confidence.`,
+      message: `Aadhaar OCR data extracted successfully with ${latestQueue ? latestQueue.ocrConfidence || user.ocrConfidence || 0 : user.ocrConfidence || 0}% confidence.`,
       timestamp: user.ocrCompletedAt || user.createdAt,
       type: "success",
       badgeClass: "badge badge-green"
@@ -296,13 +311,23 @@ const getKycStatus = async (req, res) => {
       verificationStatus = "In Progress";
     }
 
-    // Fraud risk category
+    // Fraud risk category (mapped to highest probability class)
     let fraudRisk = "—";
-    if (latestQueue && latestQueue.rejectedProbability !== undefined) {
-      const score = latestQueue.rejectedProbability;
-      if (score < 30) fraudRisk = "Low";
-      else if (score <= 70) fraudRisk = "Medium";
-      else fraudRisk = "High";
+    if (latestQueue) {
+      const app = latestQueue.approvedProbability || 0;
+      const rev = latestQueue.manualReviewProbability || 0;
+      const rej = latestQueue.rejectedProbability || 0;
+
+      let max = app;
+      fraudRisk = "Low";
+      if (rev > max) {
+        max = rev;
+        fraudRisk = "Medium";
+      }
+      if (rej > max) {
+        max = rej;
+        fraudRisk = "High";
+      }
     }
 
     // Admin Review Status

@@ -114,6 +114,7 @@ const upperLine =
 
     console.log(extractedText);
 
+    const confidence = result.data.confidence ? Math.round(result.data.confidence) : null;
     const userId =
   req.user.id;
 
@@ -132,6 +133,8 @@ await User.findByIdAndUpdate(
     aadhaarNumber:
       aadhaarNumber,
 
+    ocrConfidence: confidence,
+
     ocrCompletedAt: new Date()
 
   }
@@ -148,7 +151,8 @@ await User.findByIdAndUpdate(
     name,
     dob,
     gender,
-    aadhaarNumber
+    aadhaarNumber,
+    ocrConfidence: confidence
   },
 
   rawText: extractedText
@@ -261,6 +265,7 @@ for (let i = 0; i < lines.length; i++) {
   }
 
 }
+const confidence = result.data.confidence ? Math.round(result.data.confidence) : null;
 const userId =
   req.user.id;
 await User.findByIdAndUpdate(
@@ -268,7 +273,8 @@ await User.findByIdAndUpdate(
   {
     panName: name,
     panDOB: dob,
-    panNumber:panNumber
+    panNumber: panNumber,
+    ocrConfidence: confidence
   }
 );
 
@@ -283,7 +289,8 @@ await User.findByIdAndUpdate(
         extractedData: {
           name,
           dob,
-          panNumber
+          panNumber,
+          ocrConfidence: confidence
         },
 
         rawText:

@@ -22,14 +22,14 @@ console.log(ocrData);
         <div className="card" style={{ marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--gold)' }}><i className="ti ti-sparkles"></i> AI-Extracted Data</span>
-            <span className="badge badge-green">94% confidence</span>
+            <span className="badge badge-green">{ocrData?.ocrConfidence ? `${ocrData.ocrConfidence}% confidence` : 'OCR Completed'}</span>
           </div>
           <div style={{ background: 'var(--bg3)', borderRadius: 'var(--r)', overflow: 'hidden', marginBottom: '16px' }}>
-            <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Name</span><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span className="ocr-val">{ocrData?.name || "Not Found"}</span><span className="confidence-pill badge-green" style={{ background: 'var(--green-dim)', color: 'var(--green)' }}>98%</span></div></div>
-            <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Date of Birth</span><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span className="ocr-val">{ocrData?.dob || "Not Found"}</span><span className="confidence-pill badge-green" style={{ background: 'var(--green-dim)', color: 'var(--green)' }}>96%</span></div></div>
-            <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Aadhaar No.</span><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span className="ocr-val">{ocrData?.aadhaarNumber || "Not Found"}</span><span className="confidence-pill badge-gold" style={{ background: 'var(--gold-dim)', color: 'var(--gold)' }}>89%</span></div></div>
-            <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Gender</span><div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span className="ocr-val">{ocrData?.gender || "Not Found"}</span><span className="confidence-pill badge-green" style={{ background: 'var(--green-dim)', color: 'var(--green)' }}>99%</span></div></div>
-            <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Address</span><div style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '280px' }}><span className="ocr-val" style={{ textAlign: 'right', fontSize: '11px', lineHeight: 1.5 }}>14, Velachery Main Rd, Chennai, TN 600042</span><span className="confidence-pill badge-amber" style={{ background: 'var(--amber-dim)', color: 'var(--amber)' }}>81%</span></div></div>
+            <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Name</span><span className="ocr-val">{ocrData?.name || "Not Found"}</span></div>
+            <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Date of Birth</span><span className="ocr-val">{ocrData?.dob || "Not Found"}</span></div>
+            <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Aadhaar No.</span><span className="ocr-val">{ocrData?.aadhaarNumber || "Not Found"}</span></div>
+            <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Gender</span><span className="ocr-val">{ocrData?.gender || "Not Found"}</span></div>
+            <div className="ocr-field-row" style={{ padding: '12px 14px' }}><span className="ocr-key">Address</span><span className="ocr-val" style={{ textAlign: 'right', fontSize: '11px', lineHeight: 1.5 }}>{ocrData?.address || "Not Found"}</span></div>
           </div>
         </div>
 
@@ -40,7 +40,7 @@ console.log(ocrData);
             <div className="form-group"><label>Date of Birth</label><input type="text" defaultValue={ocrData?.dob} /></div>
             <div className="form-group"><label>Gender</label><select defaultValue={ocrData?.gender}><option value="FEMALE">Female</option><option value="MALE">Male</option><option value="OTHER"> Other</option></select></div></div>
           <div className="form-group"><label>Aadhaar Number (Last 4 visible)</label><input type="text" defaultValue={ocrData?.aadhaarNumber} /></div>
-          <div className="form-group"><label>Address</label><textarea rows="2" defaultValue="14, Velachery Main Rd, Chennai, Tamil Nadu 600042"></textarea></div>
+          <div className="form-group"><label>Address</label><textarea rows="2" defaultValue={ocrData?.address || ""}></textarea></div>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button className="btn btn-outline" onClick={() => navigate('/verify/aadhaar')}>← Re-upload</button>

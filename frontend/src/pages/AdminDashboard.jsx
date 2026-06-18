@@ -145,10 +145,26 @@ export default function AdminDashboard() {
     return 'var(--red)';
   };
 
-  const getFraudBadgeClass = (score) => {
-    if (score < 30) return 'badge badge-green';
-    if (score <= 70) return 'badge badge-amber';
-    return 'badge badge-red';
+  const getHighestRiskCategory = (u) => {
+    const app = u.approvedProbability || 0;
+    const rev = u.manualReviewProbability || 0;
+    const rej = u.rejectedProbability || 0;
+
+    let max = app;
+    let category = "Low Risk";
+    let badgeClass = "badge badge-green";
+
+    if (rev > max) {
+      max = rev;
+      category = "Medium Risk";
+      badgeClass = "badge badge-amber";
+    }
+    if (rej > max) {
+      max = rej;
+      category = "High Risk";
+      badgeClass = "badge badge-red";
+    }
+    return { category, badgeClass };
   };
 
   const getStatusBadgeClass = (status) => {
@@ -410,7 +426,7 @@ export default function AdminDashboard() {
                   <th>Email</th>
                   <th>Submission Time</th>
                   <th>Face Match Score</th>
-                  <th>Fraud Score</th>
+                   <th>Overall Risk</th>
                   <th>Current Status</th>
                   <th>Action Buttons</th>
                 </tr>
@@ -449,8 +465,8 @@ export default function AdminDashboard() {
                         {user.faceMatchScore ? `${user.faceMatchScore}%` : '—'}
                       </td>
                       <td>
-                        <span className={getFraudBadgeClass(user.rejectedProbability)}>
-                          {user.rejectedProbability ?? 0}%
+                        <span className={getHighestRiskCategory(user).badgeClass}>
+                          {getHighestRiskCategory(user).category}
                         </span>
                       </td>
                       <td>

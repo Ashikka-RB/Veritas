@@ -49,8 +49,26 @@ export default function FraudMonitor() {
     }
   };
 
-  const highRiskUsers = queue.filter((u) => u.rejectedProbability > 70);
-  const mediumRiskUsers = queue.filter((u) => u.rejectedProbability >= 30 && u.rejectedProbability <= 70);
+  const getRiskCategory = (u) => {
+    const app = u.approvedProbability || 0;
+    const rev = u.manualReviewProbability || 0;
+    const rej = u.rejectedProbability || 0;
+
+    let max = app;
+    let cat = "low";
+    if (rev > max) {
+      max = rev;
+      cat = "medium";
+    }
+    if (rej > max) {
+      max = rej;
+      cat = "high";
+    }
+    return cat;
+  };
+
+  const highRiskUsers = queue.filter((u) => getRiskCategory(u) === "high");
+  const mediumRiskUsers = queue.filter((u) => getRiskCategory(u) === "medium");
 
   return (
     <div className="page active" id="p-fraud">
@@ -71,7 +89,7 @@ export default function FraudMonitor() {
 
           <div className="stat-grid">
             <div className="stat-card" style={{ borderColor: 'rgba(226,75,74,0.2)' }}>
-              <div className="stat-label">High Risk (&gt;70%)</div>
+              <div className="stat-label">High Risk</div>
               <div className="stat-value" style={{ color: 'var(--red)' }}>{highRiskUsers.length}</div>
             </div>
             <div className="stat-card">
@@ -81,7 +99,7 @@ export default function FraudMonitor() {
             <div className="stat-card">
               <div className="stat-label">Low Risk</div>
               <div className="stat-value" style={{ color: 'var(--green)' }}>
-                {queue.filter((u) => u.rejectedProbability < 30).length}
+                {queue.filter((u) => getRiskCategory(u) === "low").length}
               </div>
             </div>
             <div className="stat-card">
@@ -115,12 +133,11 @@ export default function FraudMonitor() {
                       Face match: {user.faceMatchScore}% · OCR: {user.ocrConfidence}% · Status: {user.finalStatus}
                     </div>
                   </div>
-                  <div className="fraud-score-bar">
-                    <div className="progress-bar-bg">
-                      <div className="progress-bar-fill" style={{ width: `${user.rejectedProbability}%`, background: 'var(--red)' }}></div>
-                    </div>
-                    <div style={{ fontSize: '10px', color: 'var(--red)', marginTop: '3px', textAlign: 'right' }}>
-                      {user.rejectedProbability}% FRAUD
+                  <div className="fraud-score-bar" style={{ minWidth: '180px', display: 'flex', flexDirection: 'column', gap: '3px', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', color: 'var(--text3)' }}>
+                      <span style={{ color: 'var(--green)' }}>Approve: {user.approvedProbability || 0}%</span>
+                      <span style={{ color: 'var(--amber)' }}>Review: {user.manualReviewProbability || 0}%</span>
+                      <span style={{ color: 'var(--red)' }}>Reject: {user.rejectedProbability || 0}%</span>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
@@ -154,7 +171,7 @@ export default function FraudMonitor() {
                 <thead>
                   <tr>
                     <th>User</th>
-                    <th>Fraud Score</th>
+                    <th>Probability Breakdown</th>
                     <th>Face Score</th>
                     <th>Issue</th>
                     <th>Action</th>
@@ -180,7 +197,11 @@ export default function FraudMonitor() {
                           {user.userId?.fullName || 'Guest User'}
                         </td>
                         <td>
-                          <span className="badge badge-amber">{user.rejectedProbability}%</span>
+                          <div style={{ display: 'flex', gap: '6px', fontSize: '11px', fontFamily: 'var(--mono)' }}>
+                            <span style={{ color: 'var(--green)' }}>A: {user.approvedProbability || 0}%</span>
+                            <span style={{ color: 'var(--amber)' }}>R: {user.manualReviewProbability || 0}%</span>
+                            <span style={{ color: 'var(--red)' }}>J: {user.rejectedProbability || 0}%</span>
+                          </div>
                         </td>
                         <td>{user.faceMatchScore}%</td>
                         <td style={{ color: 'var(--text2)', fontSize: '12px' }}>

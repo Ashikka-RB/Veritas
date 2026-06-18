@@ -89,7 +89,8 @@ const saveFaceVerification = async (req, res) => {
         faceImage,
         faceMatchScore,
         faceVerificationStatus: "COMPLETED",
-        faceVerificationTimestamp: new Date()
+        faceVerificationTimestamp: new Date(),
+        livenessPassed: true
       },
       { new: true }
     );

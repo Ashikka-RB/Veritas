@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import AdminSidebar from '../components/AdminSidebar';
+import { maskAadhaar, maskPan } from '../utils/masking';
 
 const getImageUrl = (path) => {
   if (!path) return '';
@@ -131,6 +132,21 @@ export default function VerifyUser() {
   const namesMatch = dbUser?.panName && dbUser?.aadhaarName && 
     dbUser.panName.trim().toUpperCase() === dbUser.aadhaarName.trim().toUpperCase();
 
+  const appProb = queue.approvedProbability || 0;
+  const revProb = queue.manualReviewProbability || 0;
+  const rejProb = queue.rejectedProbability || 0;
+
+  let maxProb = appProb;
+  let predictedOutcome = "APPROVED";
+  if (revProb > maxProb) {
+    maxProb = revProb;
+    predictedOutcome = "MANUAL REVIEW";
+  }
+  if (rejProb > maxProb) {
+    maxProb = rejProb;
+    predictedOutcome = "REJECTED";
+  }
+
   return (
     <div className="page active" id="p-verify-user">
       <div className="admin-layout">
@@ -164,9 +180,25 @@ export default function VerifyUser() {
               </div>
             </div>
             <div className="stat-card">
-              <div className="stat-label">Fraud Score</div>
-              <div className="stat-value" style={{ color: queue.rejectedProbability > 70 ? 'var(--red)' : queue.rejectedProbability >= 30 ? 'var(--amber)' : 'var(--green)', fontSize: '22px' }}>
-                {queue.rejectedProbability ? `${queue.rejectedProbability}%` : '—'}
+              <div className="stat-label">Overall Risk</div>
+              <div 
+                className="stat-value" 
+                style={{ 
+                  color: (queue.rejectedProbability || 0) > (queue.manualReviewProbability || 0) && (queue.rejectedProbability || 0) > (queue.approvedProbability || 0)
+                    ? 'var(--red)' 
+                    : (queue.manualReviewProbability || 0) > (queue.approvedProbability || 0)
+                    ? 'var(--amber)' 
+                    : 'var(--green)', 
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  marginTop: '4px'
+                }}
+              >
+                {(queue.rejectedProbability || 0) > (queue.manualReviewProbability || 0) && (queue.rejectedProbability || 0) > (queue.approvedProbability || 0)
+                  ? 'HIGH RISK' 
+                  : (queue.manualReviewProbability || 0) > (queue.approvedProbability || 0)
+                  ? 'MEDIUM RISK' 
+                  : 'LOW RISK'}
               </div>
             </div>
             <div className="stat-card">
@@ -244,13 +276,13 @@ export default function VerifyUser() {
                 <div className="ocr-field-row" style={{ padding: '10px 14px' }}>
                   <span className="ocr-key">Aadhaar</span>
                   <span className="ocr-val" style={{ fontSize: '12px' }}>
-                    {dbUser?.aadhaarNumber || 'Not Found'}
+                    {maskAadhaar(dbUser?.aadhaarNumber)}
                   </span>
                 </div>
                 <div className="ocr-field-row" style={{ padding: '10px 14px' }}>
                   <span className="ocr-key">PAN</span>
                   <span className="ocr-val" style={{ fontSize: '12px' }}>
-                    {dbUser?.panNumber || 'Not Found'}
+                    {maskPan(dbUser?.panNumber)}
                   </span>
                 </div>
                 <div className="ocr-field-row" style={{ padding: '10px 14px' }}>
@@ -285,20 +317,26 @@ export default function VerifyUser() {
               </div>
 
               <div style={{ marginTop: '16px', borderTop: '0.5px solid var(--border)', paddingTop: '16px' }}>
-                <div style={{ fontSize: '11px', color: 'var(--text3)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>ML Decision Probabilities</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', textAlign: 'center', marginTop: '10px' }}>
-                  <div style={{ background: 'var(--bg2)', padding: '6px 8px', borderRadius: '4px' }}>
-                    <div style={{ fontSize: '10px', color: 'var(--text3)' }}>Approved</div>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--green)', fontFamily: 'var(--mono)' }}>{queue.approvedProbability || 0}%</div>
+                <div style={{ fontSize: '11px', color: 'var(--text3)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>ML Risk Assessment</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', textAlign: 'center', marginTop: '10px', marginBottom: '12px' }}>
+                  <div style={{ background: 'var(--bg2)', padding: '8px', borderRadius: '6px', border: '0.5px solid var(--border)' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text3)', textTransform: 'uppercase', marginBottom: '4px' }}>Approval Prob.</div>
+                    <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--green)', fontFamily: 'var(--mono)' }}>{appProb}%</div>
                   </div>
-                  <div style={{ background: 'var(--bg2)', padding: '6px 8px', borderRadius: '4px' }}>
-                    <div style={{ fontSize: '10px', color: 'var(--text3)' }}>Review</div>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--amber)', fontFamily: 'var(--mono)' }}>{queue.manualReviewProbability || 0}%</div>
+                  <div style={{ background: 'var(--bg2)', padding: '8px', borderRadius: '6px', border: '0.5px solid var(--border)' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text3)', textTransform: 'uppercase', marginBottom: '4px' }}>Review Prob.</div>
+                    <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--amber)', fontFamily: 'var(--mono)' }}>{revProb}%</div>
                   </div>
-                  <div style={{ background: 'var(--bg2)', padding: '6px 8px', borderRadius: '4px' }}>
-                    <div style={{ fontSize: '10px', color: 'var(--text3)' }}>Rejected</div>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--red)', fontFamily: 'var(--mono)' }}>{queue.rejectedProbability || 0}%</div>
+                  <div style={{ background: 'var(--bg2)', padding: '8px', borderRadius: '6px', border: '0.5px solid var(--border)' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text3)', textTransform: 'uppercase', marginBottom: '4px' }}>Rejection Prob.</div>
+                    <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--red)', fontFamily: 'var(--mono)' }}>{rejProb}%</div>
                   </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg2)', padding: '10px 14px', borderRadius: '6px', border: '0.5px solid var(--border)' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text3)' }}>Predicted Outcome:</span>
+                  <span className={`badge ${predictedOutcome === 'APPROVED' ? 'badge-green' : predictedOutcome === 'MANUAL REVIEW' ? 'badge-amber' : 'badge-red'}`} style={{ fontWeight: 600 }}>
+                    {predictedOutcome}
+                  </span>
                 </div>
               </div>
             </div>
@@ -318,7 +356,7 @@ export default function VerifyUser() {
             </div>
             <div className="audit-row">
               <span style={{ minWidth: '140px', color: 'var(--text3)' }}>Timeline 3</span>
-              <span style={{ flex: 1 }}>OCR extraction · {queue.ocrConfidence || 94}% confidence</span>
+              <span style={{ flex: 1 }}>OCR extraction · {queue.ocrConfidence || dbUser?.ocrConfidence || 0}% confidence</span>
               <span style={{ color: 'var(--green)' }}>OK</span>
             </div>
             <div className="audit-row">
@@ -338,10 +376,19 @@ export default function VerifyUser() {
             <div className="audit-row" style={{ border: 'none' }}>
               <span style={{ minWidth: '140px', color: 'var(--text3)' }}>Timeline 6</span>
               <span style={{ flex: 1 }}>
-                Fraud ML score: {queue.rejectedProbability}% ({queue.rejectedProbability < 30 ? 'LOW' : queue.rejectedProbability <= 70 ? 'MEDIUM' : 'HIGH'})
+                Fraud ML outcome: {predictedOutcome} (Approve: {appProb}%, Review: {revProb}%, Reject: {rejProb}%)
               </span>
-              <span style={{ color: queue.rejectedProbability > 70 ? 'var(--red)' : queue.rejectedProbability >= 30 ? 'var(--amber)' : 'var(--green)' }}>
-                OK
+              <span 
+                style={{ 
+                  color: predictedOutcome === 'REJECTED' 
+                    ? 'var(--red)' 
+                    : predictedOutcome === 'MANUAL REVIEW' 
+                    ? 'var(--amber)' 
+                    : 'var(--green)',
+                  fontWeight: 600
+                }}
+              >
+                {predictedOutcome === 'REJECTED' ? 'HIGH RISK' : predictedOutcome === 'MANUAL REVIEW' ? 'MEDIUM RISK' : 'LOW RISK'}
               </span>
             </div>
           </div>

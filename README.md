@@ -1,5 +1,7 @@
 # Veritas eKYC
-### Enterprise-Grade AI-Powered Identity Verification & Fraud Detection System
+### A Full-Stack Onboarding and Identity Verification Simulation
+
+Veritas eKYC is a student-level full-stack web application designed to simulate a digital identity verification and user onboarding workflow. It provides user registration, email OTP verification, document upload (Aadhaar and PAN), optical character recognition (OCR) text extraction, client-side face comparison, and a basic machine learning service to categorize submission risk. It also features an admin panel for reviewing applications and managing statuses.
 
 [![React](https://img.shields.io/badge/Frontend-React%20%2F%20Vite-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![Express](https://img.shields.io/badge/Backend-Express.js-000000?style=for-the-badge&logo=express)](https://expressjs.com/)
@@ -12,45 +14,41 @@
 ---
 
 ## 1. Project Title
-**Veritas eKYC**: A secure, multi-modal, end-to-end identity verification and real-time fraud assessment pipeline built for modern banking and fintech platforms.
+**Veritas eKYC**: A full-stack web application designed to demonstrate and simulate a digital identity verification onboarding process.
 
 ---
 
-## 2. Executive Summary
-**Veritas eKYC** is a full-stack automated identity verification platform designed to orchestrate secure user onboarding. By combining client-side computer vision (`face-api.js`), local optical character recognition (`Tesseract.js`), cloud media storage (`Cloudinary`), and an ensemble machine learning classifier (`Scikit-Learn` Random Forest), Veritas provides automated, real-time risk evaluations. 
-
-The system guides users through email verification, document uploads, interactive liveness challenges, and face-document similarity matching. Results are processed through a scikit-learn fraud classifier and, if flagged, routed to a dedicated administrative dashboard for human-in-the-loop review. Built with security-first patterns, the application logs every onboarding event to an immutable audit trail and registers client device fingerprints to prevent account takeover and sybil attacks.
+## 2. Introduction
+This project was developed as a student portfolio application to simulate an end-to-end user onboarding flow. The goal is to show how different components—a React single-page app, a Node.js/Express API server, a MongoDB database, and a Python Flask machine learning service—can be integrated to automate and verify user-submitted identity files.
 
 ---
 
-## 3. Business Problem
-Financial institutions lose billions annually to identity fraud, synthetic identities, and bot-driven onboarding flows. Traditional KYC (Know Your Customer) systems suffer from:
-*   **High Abandonment Rates:** Friction-heavy processes that take days to complete.
-*   **Vulnerability to Spoofing:** Simple selfie uploads are easily bypassed using high-definition photos, screen replays, or printouts.
-*   **Manual Overhead:** Compliance teams are overwhelmed by reviewing every single application.
-*   **Lack of Traceability:** Poor audit trails make tracking document alterations and compromised devices difficult.
+## 3. Project Overview
+In modern web applications, verifying user identities is a common requirement during onboarding. This project acts as a functional mockup of this flow. It provides a step-by-step wizard for users to:
+1. Verify their email address using an OTP.
+2. Upload scans of their Aadhaar and PAN documents.
+3. Automatically extract document fields via server-side OCR.
+4. Verify they are present and match their document photo using browser-based webcam facial comparison and liveness check.
+5. Review their status, which is categorized by a machine learning model and finalized by an administrator.
 
 ---
 
-## 4. Solution Overview
-Veritas mitigates these problems through a secure, self-service digital onboarding experience:
-*   **Frictionless Verification:** Automates data entry using server-side document OCR.
-*   **Interactive Liveness Checking:** Bypasses presentation attacks (photos, video replays) by enforcing a real-time sequence of random biometric motions (blinking, head turns, smiling).
-*   **Hybrid Matching Logic:** Performs zero-server-overhead client-side biometric comparison, then cross-validates data integrity server-side.
-*   **Automated Risk Grading:** Evaluates verification confidence and document matches using a Random Forest machine learning model, instantly approving low-risk users.
-*   **Human-in-the-Loop Safeguards:** Forwards borderline and high-risk applicants to a protected admin queue, preserving operational oversight.
-
----
-
-## 5. Core Features
-*   **Secure Auth & OTP Verification:** Stateless JWT authentication, Nodemailer-based Gmail SMTP OTP verification, password hashing, and forgot/reset password flows.
-*   **Multi-Document OCR Parsing:** Local extraction of name, date of birth, gender, Aadhaar, and PAN numbers using Tesseract.js, paired with custom regex sanitization.
-*   **Client-Side Biometric Bi-Verification:** Webcam capture matching real-time face descriptors to Aadhaar card profile photos using `face-api.js` local neural network weights.
-*   **Custom Interactive Liveness Protocol:** Real-time feedback verifying genuine user presence through blink, head rotation angles, and happy expression classification.
-*   **Scikit-Learn Fraud Assessment:** Python Flask microservice deploying a trained Random Forest model mapping face match confidence, document alignment, liveness checks, and OCR confidence to a final status recommendation.
-*   **Access-Controlled Admin Suite:** Restricted administrative back-office offering dashboard analytics, verification throughput stats, fraud classification distribution, and audit log analysis.
-*   **Deduplicated Administrative Queue:** MongoDB unique partial index prevents concurrent submission races, ensuring clean queue transitions.
-*   **Session Auditing & Device Fingerprinting:** Automatically tracks client IP, user-agent details (browser, OS, device type), geolocations, and log entries (LOGIN, DOCUMENT_UPLOAD, FACE_VERIFICATION, ADMIN_DECISION).
+## 4. Implemented Features
+The application includes the following completed features:
+*   **User Registration & Authentication:** Standard user signup and login with secure session handling.
+*   **Email OTP Verification:** Validates user identity during signup using a 6-digit One-Time Password (OTP) sent via email (Nodemailer SMTP).
+*   **Document Upload:** Allows users to upload scans of their Aadhaar and PAN cards, storing the files in Cloudinary.
+*   **OCR Text Extraction:** Automatically extracts text from uploaded documents using Tesseract.js.
+*   **Data Fields Parsing:** Automatically identifies and extracts Name, Date of Birth, Gender, Aadhaar Number, and PAN details from the recognized text.
+*   **Face Verification:** Performs biometric comparison between the photo on the uploaded Aadhaar card and the user's live webcam selfie using client-side `face-api.js`.
+*   **Liveness Detection:** Implements webcam movement checks (blinking, head turns, and smiling) to verify that a real user is present in front of the camera.
+*   **Cloudinary Storage:** Securely stores uploaded documents and biometric selfies.
+*   **MongoDB Atlas Database:** Persists application data including user profile details, KYC status, and audit logs.
+*   **Admin Review Dashboard:** A dashboard for administrators to view applicant details, metrics, and logs.
+*   **Admin Actions:** Admins can Approve, Reject, Request Re-upload, or Flag Fraud (which locks the account).
+*   **Audit Logs:** Keeps a history of user and administrator actions (logins, uploads, status updates) with metadata like IP addresses and user agents.
+*   **KYC Status Tracking:** Tracks applicant onboarding progress across steps (Pending, Under Review, Approved, Rejected).
+*   **Random Forest Risk Classifier:** A Flask microservice running a Scikit-Learn Random Forest model that predicts a KYC recommendation (Approved, Manual Review, Rejected).
 
 ---
 
@@ -121,6 +119,8 @@ flowchart TD
 ---
 
 ## 8. Tech Stack
+
+The application uses a full-stack JavaScript architecture for the main web platform, combined with a Python microservice for machine learning classification:
 
 | Component | Technology | Rationale / Use Case |
 | :--- | :--- | :--- |
@@ -229,7 +229,12 @@ Holds user application metadata submitted for manual evaluation.
 > ```js
 > adminQueueSchema.index(
 >   { userId: 1, email: 1 },
->   { unique: true, partialFilterExpression: { adminDecision: "PENDING" } }
+>   { 
+>     unique: true, 
+>     partialFilterExpression: { 
+>       adminDecision: "PENDING"
+>     } 
+>   }
 > );
 > ```
 
@@ -258,58 +263,61 @@ Tracks user browser/OS endpoints to identify session hijacking.
 ---
 
 ## 11. Authentication Flow
-Veritas secures client-server communication using JSON Web Tokens (JWT) paired with one-time password challenges:
-1.  **Register:** User registers details. The API hashes the password and generates a 6-digit OTP, saving its expiry (10 min) in MongoDB.
-2.  **OTP Delivery:** Nodemailer sends the OTP using Gmail SMTP. If email transmission fails, user creation rolls back.
-3.  **OTP Verify:** User submits the OTP. The server verifies validity, marks `isVerified: true`, and returns a JWT signed with `JWT_SECRET` (valid for 7 days).
-4.  **Device Registry:** Upon validation, the user agent and IP address are parsed to record device footprints in `Device` collection.
-5.  **Forgot/Reset Password:** Generates a secure cryptographic reset token via `crypto.randomBytes(32)` that expires in 15 minutes, delivering a localhost reset link to the user.
+Authentication uses standard JWT tokens:
+1.  **Sign Up:** Creates a user in MongoDB. Generates a 6-digit OTP and OTP expiry time (10 min).
+2.  **Verify OTP:** Activates the user by matching the entered code against the database. On success, signs and returns a JWT.
+3.  **Log In:** Compares password hash using bcryptjs and returns a JWT.
+4.  **Forgot/Reset Password:** Sends an email link containing a cryptographically secure token (`crypto.randomBytes`) that allows updating the password within 15 minutes.
 
 ---
 
 ## 12. OCR Processing Flow
-Server-side document ingestion uses `Tesseract.js` for local data extraction:
-1.  **Document Upload:** Multer receives the file and pipes it to a folder in Cloudinary. Cloudinary returns a secure URL.
-2.  **OCR Processing:** The Express controller downloads the image buffer and runs `Tesseract.recognize(imagePath, "eng")`.
-3.  **Data Extraction:** Regex patterns parse the extracted text:
-    *   **Aadhaar Number:** `/\d{4}\s?\d{4}\s?\d{4}/` (cleaned of whitespace, formatted).
-    *   **Date of Birth:** `/\d{2}\/\d{2}\/\d{4}/`
-    *   **Gender:** Scans for keywords `"MALE"` or `"FEMALE"`.
-    *   **Name Parsing:** Sanitizes lines of special characters, checks name lengths, and filters out common government document text.
-4.  **State Persistence:** Saves values directly to the user's document schema in MongoDB.
+OCR extracts identity details using Tesseract.js:
+1.  **Image Upload:** Multer receives the image and pipes it directly to Cloudinary.
+2.  **Text Recognition:** The Express backend runs Tesseract on the image.
+3.  **Parsing:** Regular expressions extract values:
+    *   *Aadhaar:* 12-digit number pattern `/\d{4}\s?\d{4}\s?\d{4}/`
+    *   *PAN:* 10-character alphanumeric pattern `/[A-Z]{5}[0-9]{4}[A-Z]{1}/`
+    *   *DOB:* Date format `/\d{2}\/\d{2}\/\d{4}/`
+    *   *Gender:* Checks if text contains `"MALE"` or `"FEMALE"`
+    *   *Name:* Extracts Name by cleaning lines and excluding keywords like "Government", "India", or "Aadhaar".
+4.  **Database Save:** Saves parsed data fields to the user document.
 
 ---
 
 ## 13. Face Verification Flow
-Client-side face matching and liveness protocols are built using `face-api.js` to eliminate server-side CPU bottlenecks:
-
-### Biometric Liveness Verification Protocol
-The user must pass a sequence of randomized movement challenges:
-1.  **Blink Detection:** Analyzes Eye Aspect Ratio (EAR) using eye landmark indices:
-    $$\text{EAR} = \frac{||\text{p2} - \text{p6}|| + ||\text{p3} - \text{p5}||}{2 \times ||\text{p1} - \text{p4}||}$$
-    A blink is logged when EAR falls below `0.29` and returns above `0.30`.
-2.  **Left Head Turn:** Computes the horizontal nose position relative to the jaw outlines:
-    $$\text{NoseRatio} = \frac{\text{NoseX} - \text{Jaw}_0\text{X}}{\text{Jaw}_{16}\text{X} - \text{Jaw}_0\text{X}}$$
-    A left head turn is registered when the ratio exceeds `0.60`.
-3.  **Right Head Turn:** Registered when the ratio falls below `0.40`.
-4.  **Smile Detection:** Checks expressions output by the face-api neural net. A smile is verified when `expressions.happy > 0.35`.
-
-Once liveness is confirmed, the client captures a webcam frame, fetches the user's Aadhaar photo, detects face descriptors for both, and calculates the similarity using Euclidean distance:
-$$\text{Similarity \%} = \max\left(0, \text{round}\left((1 - \text{EuclideanDistance}) \times 100\right)\right)$$
-
-The captured selfie is sent to `/api/verification/face` as multipart data, uploaded to Cloudinary, and saved to MongoDB along with the similarity score.
+Face verification runs in the client browser using `face-api.js` to avoid overloading the server:
+1.  **Liveness Verification:** Captures webcam stream and checks for the following landmarks:
+    *   *Blink Detection:* Measures the Eye Aspect Ratio (EAR) based on vertical and horizontal eyelid distance:
+        $$\text{EAR} = \frac{||\text{p2} - \text{p6}|| + ||\text{p3} - \text{p5}||}{2 \times ||\text{p1} - \text{p4}||}$$
+        A blink registers when the average EAR falls below 0.29 and returns above 0.30.
+    *   *Head Rotation:* Tracks horizontal nose placement relative to jaw boundaries:
+        $$\text{NoseRatio} = \frac{\text{NoseX} - \text{Jaw}_0\text{X}}{\text{Jaw}_{16}\text{X} - \text{Jaw}_0\text{X}}$$
+        A left turn registers when the ratio is > 0.60, and a right turn when it is < 0.40.
+    *   *Smile Detection:* Checks face expression predictions (`expressions.happy > 0.35`).
+2.  **Face Matching:** Loads the Aadhaar photo from the user profile, calculates face descriptors for both the Aadhaar image and the selfie, and determines the Euclidean distance:
+    $$\text{Similarity \%} = \max\left(0, \text{round}\left((1 - \text{EuclideanDistance}) \times 100\right)\right)$$
+3.  **Upload:** Uploads the captured selfie to Cloudinary and saves the similarity score.
 
 ---
 
-## 14. Admin Review Workflow
-When the Python ML model recommends `MANUAL_REVIEW`, the application transitions to the Admin workflow:
-*   **Queue Entry:** The system creates an `AdminQueue` record, sets `adminDecision` to `"PENDING"`, updates `User.kycStatus` to `"under_review"`, and records a timeline event.
-*   **Access-Controlled Decisions:** Authorized administrators review the submitted documents, webcam photo, OCR extracted text, and ML fraud probability distribution.
-*   **Administrative Actions:**
-    *   **Approve:** Sets `adminDecision` to `"APPROVED"`, updates `kycStatus` to `"approved"`, and writes an success event to the audit log.
-    *   **Reject:** Requires notes, sets `adminDecision` to `"REJECTED"`, updates `kycStatus` to `"rejected"`, and logs the rejection reason.
-    *   **Request Reupload:** Requires notes, sets `adminDecision` to `"REUPLOAD_REQUIRED"`, resets `kycStatus` to `"pending"`, and prompts the user to re-submit their documents.
-    *   **Flag Fraud:** Sets `adminDecision` to `"FLAGGED"`, updates `kycStatus` to `"rejected"`, locks the account (`isLocked: true`), and logs the fraud event.
+## 14. Machine Learning Classification
+The project uses a Random Forest classifier trained on a synthetic dataset. The model generates risk recommendations (Approved, Manual Review, Rejected) based on face match score, OCR confidence, PAN-Aadhaar matching, and liveness verification. Final approval decisions are still made by the administrator.
+
+The classification model runs as a standalone Python microservice using Flask and Scikit-Learn. The model calculates the probability for each outcome class, and the highest probability determines the recommendation category returned to the backend queue.
+
+---
+
+## 14a. Admin Review Workflow
+Applications that require manual evaluation are sent to the administrator review queue. Administrators log into a dedicated dashboard to perform the following operations:
+1.  **Applicant Queue:** Displays a list of all pending applications, including applicant details, extraction confidences, and the ML risk recommendations.
+2.  **Detailed Review Page:** Displays side-by-side matches of uploaded documents, extracted names, dates of birth, document numbers, and liveness status checks.
+3.  **Admin Decisions:**
+    *   *Approve:* Changes user verification status to `approved`.
+    *   *Reject:* Rejects the application and logs the specific reason.
+    *   *Request Re-upload:* Resets document flags to let the user upload again.
+    *   *Flag Fraud / Lock:* Sets status to `rejected` and locks the account (`isLocked: true`).
+4.  **Audit Logs:** Admins can view activity logs detailing each system transaction, actor, action status, IP address, and browser metadata.
 
 ---
 
@@ -370,44 +378,39 @@ When the Python ML model recommends `MANUAL_REVIEW`, the application transitions
 ---
 
 ## 16. Security Features
-*   **Immutable Audit Logging:** Tracks all authentication, document processing, and admin decisions in the `AuditLog` collection.
-*   **Multi-Factor Admin Login:** Demands a verified administrator password coupled with a unique access code.
-*   **Defense Against Race Conditions:** Uses a composite unique partial index in MongoDB on `{ userId: 1, email: 1 }` for pending queue items, preventing duplicate submissions during rapid click events.
-*   **Account Locking Safeguards:** Flagging an application as fraud locks the corresponding user account (`isLocked: true`), preventing further logins or registration attempts.
-*   **Cryptographically Secure Tokens:** Utilizes JWT for stateless sessions and secure token strings for password resets.
-*   **Device Fingerprinting:** Flags suspicious logins by tracking IP changes and client device profiles.
+*   **Activity Logging:** Stores events (login attempts, document uploads, admin state transitions) in the `AuditLog` collection.
+*   **Password Hashing:** Uses `bcryptjs` to hash passwords.
+*   **Role-Based Security:** Checks that JWT tokens for admin paths contain `role: "admin"`.
+*   **Queue Concurrency Lock:** Uses a partial unique index in MongoDB on `{ userId: 1, email: 1 }` for pending reviews, preventing duplicate concurrent entries.
+*   **Account Lockout:** Locking an account (`isLocked: true`) prevents further actions or logins.
 
 ---
 
 ## 17. Cloudinary Storage Architecture
-The integration uses a hierarchical folder structure in Cloudinary to keep assets organized:
-*   **Dynamic Folder Paths:** Segregates assets into dedicated directories:
-    *   `veritas-ekyc/aadhaar` (Aadhaar cards)
-    *   `veritas-ekyc/pan` (PAN cards)
-    *   `veritas-ekyc/face` (Liveness selfies)
-    *   `veritas-ekyc/others` (Fallback and test images)
-*   **Unique Public ID Generation:** Face images are saved using the pattern `face_[userId]_[timestamp]` to maintain a clear association with the user profile. Other documents are saved using standard timestamps.
-*   **Format Constraints:** Restricts uploads to `jpg`, `jpeg`, `png`, and `webp` images to block malicious executable uploads.
+*   **Folder Separation:** Uploads are sorted dynamically based on the field name:
+    *   `veritas-ekyc/aadhaar` for Aadhaar cards.
+    *   `veritas-ekyc/pan` for PAN cards.
+    *   `veritas-ekyc/face` for selfies.
+*   **Filename Generation:** Selfies are saved as `face_[userId]_[timestamp]` to link them to the user.
+*   **Format Constraints:** Standard image files (`jpg`, `jpeg`, `png`, `webp`) are enforced by Multer.
 
 ---
 
 ## 18. Deployment Architecture
-*   **Frontend Application:** Built for production via Vite and hosted on Vercel for fast content delivery.
-*   **Express API Server:** Deployed as a web service on Render, connecting securely to MongoDB Atlas.
-*   **Python Flask Service:** Deployed on Render, running the trained Random Forest classifier.
-*   **Database:** Hosted on MongoDB Atlas with IP access limits.
-*   **Storage Provider:** Media files are served over HTTPS via Cloudinary's CDN.
+*   **Frontend:** React client deployed on platforms like Vercel.
+*   **Backend Server:** Node.js Express server hosted on Render, connecting to MongoDB Atlas.
+*   **ML Service:** Flask API hosted on Render.
+*   **Database & Media:** MongoDB Atlas database cluster and Cloudinary media cloud.
 
 ---
 
 ## 19. Installation Instructions
 
 ### Prerequisites
-*   Node.js (v18+)
-*   npm
-*   Python (3.8+)
-*   Pip
-*   MongoDB Connection String
+*   Node.js (v18 or higher)
+*   Python (3.8 or higher)
+*   MongoDB Atlas Account
+*   Cloudinary Account
 
 ### Clone Codebase
 ```bash
@@ -444,10 +447,10 @@ pip install -r requirements.txt
 Create a `.env` file inside the `backend` folder:
 ```env
 PORT=8000
-MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/veritas
-JWT_SECRET=your_jwt_signing_key_here
+MONGO_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/database
+JWT_SECRET=your_secret_jwt_key
 EMAIL_USER=your_gmail_address@gmail.com
-EMAIL_PASS=your_app_password_here
+EMAIL_PASS=your_gmail_app_password
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
@@ -509,23 +512,13 @@ Start the services in separate terminal windows:
 ---
 
 ## 22. Future Enhancements
-*   **Automatic Card Cropping Integration:** Move OpenCV image border cropping directly into the server upload pipeline.
-*   **WebSocket Updates:** Replace the 30-second client-side polling with real-time WebSockets to update the user's dashboard instantly when an admin takes action.
-*   **Enhanced Document Fraud Detection:** Integrate deep learning models to identify digital alterations, text mismatches, or template violations in uploaded documents.
-*   **Automated Watchlist Checking:** Cross-reference extracted user data against international AML, sanctions, and Politically Exposed Persons (PEP) lists.
+*   **WebSocket Updates:** Pushing real-time status updates to the client dashboard instead of polling.
+*   **Layout Quality Check:** Verify document aspect ratios and brightness client-side before starting uploads.
+*   **Better OCR Validation:** Give clearer advice to users when document text extraction is unreadable.
 
 ---
 
-## 23. Business Impact
-*   **Reduced Friction:** Speeds up document validation and data entry, cutting onboarding time from hours to under 2 minutes.
-*   **Better Fraud Prevention:** Identifies presentation attacks, document mismatching, and bot-driven registration attempts.
-*   **Lower Operational Costs:** Automates low-risk approvals, allowing compliance teams to focus on manual queue items.
-*   **Audit-Ready Compliance:** Generates detailed audit trails for regulatory reporting.
+## 23. Conclusion
+Veritas eKYC is a practical demonstration of integrating different components of a modern web stack: REST APIs, client-side biometrics, cloud-based storage, and simple machine learning models. 
 
----
-
-## 24. Why This Project Stands Out
-*   **Edge Biometrics:** Performs face-matching calculations on the client side using local neural network weights, lowering server load and infrastructure costs.
-*   **Custom Liveness Protocol:** Implements custom motion-based liveness verification using only client-side javascript computer vision.
-*   **Machine Learning Integration:** Uses a scikit-learn classifier to predict fraud risk instead of relying on basic hardcoded thresholds.
-*   **Concurrent Transaction Security:** Implements a MongoDB partial index to handle concurrent submission requests cleanly.
+By building this project, I gained experience in structured full-stack architectures, handling asynchronous file upload streams, running browser-based model inference, and implementing audit security protocols. It serves as an honest, functional portfolio project demonstrating the fundamentals of software engineering, system integration, and security controls.

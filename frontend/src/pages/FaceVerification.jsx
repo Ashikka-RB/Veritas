@@ -370,6 +370,7 @@ const detectFace =
           similarity = Math.max(0, Math.round((1 - distance) * 100));
           setMatchScore(similarity);
           localStorage.setItem("faceMatchScore", similarity);
+          localStorage.setItem("livenessPassed", "true");
         } catch (err) {
           console.log("Error matching face descriptor:", err);
         }

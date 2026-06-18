@@ -40,6 +40,8 @@ const [finalStatus,
   setQueueSubmitted] =
   useState(false);
 
+  const [profileData, setProfileData] = useState(null);
+
 
   const delay = (ms) =>
   new Promise(resolve =>
@@ -47,9 +49,13 @@ const [finalStatus,
   );
 
 const runFraudAnalysis =
-async (score) => {
+async (score, profile) => {
 
   try {
+    const isPanMatched = profile && profile.panName && profile.aadhaarName &&
+      profile.panName.trim().toUpperCase() === profile.aadhaarName.trim().toUpperCase();
+    const isLivenessPassed = (localStorage.getItem("livenessPassed") === "true") || (profile && profile.livenessPassed === true);
+    const ocrConf = profile?.ocrConfidence || 0;
 
     const token = localStorage.getItem("token");
     const response =
@@ -65,9 +71,9 @@ async (score) => {
 
           body: JSON.stringify({
             faceMatch: score,
-            panMatched: true,
-            livenessPassed: true,
-            ocrConfidence: 94
+            panMatched: !!isPanMatched,
+            livenessPassed: !!isLivenessPassed,
+            ocrConfidence: ocrConf
           })
         }
       );
@@ -122,6 +128,7 @@ async (
     let fullName = null;
     let email = null;
     let phone = null;
+    let ocrConf = 0;
     const token = localStorage.getItem("token");
 
     if (token) {
@@ -137,6 +144,7 @@ async (
         fullName = profile.fullName;
         email = profile.email;
         phone = profile.phone;
+        ocrConf = profile.ocrConfidence || 0;
         localStorage.setItem("userId", profile._id);
       }
     }
@@ -147,7 +155,7 @@ async (
       email: email || "guest@example.com",
       phone: phone || "N/A",
       faceMatchScore: score,
-      ocrConfidence: 94,
+      ocrConfidence: ocrConf,
       finalStatus: status,
       approvedProbability: approved,
       manualReviewProbability: review,
@@ -186,6 +194,7 @@ useEffect(() => {
 
   const startPipeline =
     async () => {
+      let fetchedProfile = null;
       try {
         const token = localStorage.getItem("token");
         if (token) {
@@ -197,6 +206,8 @@ useEffect(() => {
           if (res.ok && !isCancelled) {
             const profile = await res.json();
             localStorage.setItem("userId", profile._id);
+            setProfileData(profile);
+            fetchedProfile = profile;
           }
         }
       } catch (err) {
@@ -226,7 +237,7 @@ useEffect(() => {
       setCurrentStage(3);
       
       const mlResult =
-      await runFraudAnalysis(score);
+      await runFraudAnalysis(score, fetchedProfile);
 
       if (!mlResult || isCancelled) {
         return;
@@ -265,6 +276,29 @@ useEffect(() => {
 
 }, []);
 
+  const isNameMatched = profileData && profileData.panName && profileData.aadhaarName &&
+    profileData.panName.trim().toUpperCase() === profileData.aadhaarName.trim().toUpperCase();
+
+  const isDobMatched = profileData && profileData.panDOB && profileData.aadhaarDOB &&
+    profileData.panDOB.trim() === profileData.aadhaarDOB.trim();
+
+  const isGenderMatched = !!profileData?.aadhaarGender;
+
+  const appProb = approvedProbability || 0;
+  const revProb = manualReviewProbability || 0;
+  const rejProb = rejectedProbability || 0;
+
+  let maxProb = appProb;
+  let riskCategory = "Low Risk";
+  if (revProb > maxProb) {
+    maxProb = revProb;
+    riskCategory = "Medium Risk";
+  }
+  if (rejProb > maxProb) {
+    maxProb = rejProb;
+    riskCategory = "High Risk";
+  }
+
   return (
     <div className="page active" id="p-processing">
       <Navbar type="processing" />
@@ -282,11 +316,32 @@ useEffect(() => {
         <div className="processing-grid" style={{ textAlign: 'left', marginBottom: '32px' }}>
           <div className="ai-step">
             <div className="ai-step-icon" style={{ background: 'var(--green-dim)', color: 'var(--green)' }}><i className="ti ti-check"></i></div>
-            <div><div style={{ fontSize: '13px', fontWeight: 500 }}>OCR Data Verified</div><div style={{ fontSize: '11px', color: 'var(--text3)' }}>94% confidence · Complete</div></div>
+            <div><div style={{ fontSize: '13px', fontWeight: 500 }}>OCR Data Verified</div><div style={{ fontSize: '11px', color: 'var(--text3)' }}>{profileData?.ocrConfidence ? `${profileData.ocrConfidence}% confidence` : 'Loading confidence...'} · Complete</div></div>
           </div>
           <div className="ai-step">
-            <div className="ai-step-icon" style={{ background: 'var(--green-dim)', color: 'var(--green)' }}><i className="ti ti-check"></i></div>
-            <div><div style={{ fontSize: '13px', fontWeight: 500 }}>PAN-Aadhaar Match</div><div style={{ fontSize: '11px', color: 'var(--text3)' }}>Names verified · Complete</div></div>
+            <div 
+              className="ai-step-icon" 
+              style={{ 
+                background: (isNameMatched && isDobMatched && isGenderMatched) ? 'var(--green-dim)' : 'var(--red-dim)', 
+                color: (isNameMatched && isDobMatched && isGenderMatched) ? 'var(--green)' : 'var(--red)' 
+              }}
+            >
+              <i className={(isNameMatched && isDobMatched && isGenderMatched) ? "ti ti-check" : "ti ti-alert-circle"}></i>
+            </div>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 500 }}>PAN-Aadhaar Match</div>
+              <div style={{ fontSize: '11px', color: 'var(--text3)', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <span style={{ color: isNameMatched ? 'var(--green)' : 'var(--red)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {isNameMatched ? "✓ Name Match" : "✗ Name Mismatch Detected"}
+                </span>
+                <span style={{ color: isDobMatched ? 'var(--green)' : 'var(--red)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {isDobMatched ? "✓ DOB Match" : "✗ DOB Mismatch Detected"}
+                </span>
+                <span style={{ color: isGenderMatched ? 'var(--green)' : 'var(--red)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  {isGenderMatched ? "✓ Gender Match" : "✗ Gender Mismatch Detected"}
+                </span>
+              </div>
+            </div>
           </div>
           <div className="ai-step">
             <div className="ai-step-icon" style={{ background: 'var(--green-dim)', color: 'var(--green)' }}><i className="ti ti-check"></i></div>
@@ -372,7 +427,7 @@ useEffect(() => {
     <div style={{ fontSize: '11px', color: 'var(--text3)' }}>
       {
         currentStage >= 5
-          ? `Rejection Risk: ${riskScore}%`
+          ? `Overall Risk: ${riskCategory}`
           : 'Pending...'
       }
     </div>

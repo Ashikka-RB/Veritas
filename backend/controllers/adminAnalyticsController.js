@@ -38,10 +38,16 @@ const getAdminMetrics = async (req, res) => {
       ? Math.round((totalWaitTimeMs / completedCount) / 60000) 
       : 4;
 
-    // 5. Fraud alerts (pending queue with score > 70)
-    const fraudAlerts = await AdminQueue.countDocuments({
-      adminDecision: "PENDING",
-      rejectedProbability: { $gt: 70 }
+    // 5. Fraud alerts (pending queue with High Risk / Rejected as highest probability)
+    const pendingItems = await AdminQueue.find({ adminDecision: "PENDING" });
+    let fraudAlerts = 0;
+    pendingItems.forEach(doc => {
+      const app = doc.approvedProbability || 0;
+      const rev = doc.manualReviewProbability || 0;
+      const rej = doc.rejectedProbability || 0;
+      if (rej > app && rej > rev) {
+        fraudAlerts++;
+      }
     });
 
     // 6. Locked accounts
@@ -125,16 +131,31 @@ const getFraudDistribution = async (req, res) => {
       });
     }
 
-    const lowCount = await AdminQueue.countDocuments({
-      rejectedProbability: { $lt: 30 }
-    });
+    const records = await AdminQueue.find({});
+    let lowCount = 0;
+    let mediumCount = 0;
+    let highCount = 0;
 
-    const mediumCount = await AdminQueue.countDocuments({
-      rejectedProbability: { $gte: 30, $lte: 70 }
-    });
+    records.forEach(doc => {
+      const app = doc.approvedProbability || 0;
+      const rev = doc.manualReviewProbability || 0;
+      const rej = doc.rejectedProbability || 0;
 
-    const highCount = await AdminQueue.countDocuments({
-      rejectedProbability: { $gt: 70 }
+      let max = app;
+      let cat = "low";
+
+      if (rev > max) {
+        max = rev;
+        cat = "medium";
+      }
+      if (rej > max) {
+        max = rej;
+        cat = "high";
+      }
+
+      if (cat === "low") lowCount++;
+      else if (cat === "medium") mediumCount++;
+      else if (cat === "high") highCount++;
     });
 
     res.status(200).json({
