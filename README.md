@@ -18,22 +18,32 @@ Veritas eKYC is a student-level full-stack web application designed to simulate 
 
 ---
 
-## 2. Introduction
-This project was developed as a student portfolio application to simulate an end-to-end user onboarding flow. The goal is to show how different components—a React single-page app, a Node.js/Express API server, a MongoDB database, and a Python Flask machine learning service—can be integrated to automate and verify user-submitted identity files.
+## 2. Business Problem & Purpose
+Banks and financial institutions must verify customer identity (KYC) before onboarding them to comply with regulatory standards and prevent fraud. Manual verification is a slow and resource-intensive process, requiring compliance officers to review physical or digital documents one by one. Incorrect, blurry, or fraudulent submissions increase operational workloads and cause onboarding delays. 
+
+This project was built to streamline the KYC verification process. It combines optical character recognition (OCR), face verification, Cloudinary document storage, email OTP verification, and admin review workflows into a single platform, simulating a practical digital onboarding application.
 
 ---
 
-## 3. Project Overview
-In modern web applications, verifying user identities is a common requirement during onboarding. This project acts as a functional mockup of this flow. It provides a step-by-step wizard for users to:
-1. Verify their email address using an OTP.
-2. Upload scans of their Aadhaar and PAN documents.
-3. Automatically extract document fields via server-side OCR.
-4. Verify they are present and match their document photo using browser-based webcam facial comparison and liveness check.
-5. Review their status, which is categorized by a machine learning model and finalized by an administrator.
+## 3. Why This Project?
+Traditional KYC workflows often involve multiple disconnected, manual verification steps. Reviewers must check documents, manually compare identity details, validate client signatures or photos, and maintain audit records. 
+
+This application was developed as a learning project to demonstrate how modern web technologies can automate parts of the KYC process. The goal is not to replace existing enterprise banking systems, but to showcase a functional, end-to-end digital identity verification workflow. It serves as a demonstration of frontend development, backend API design, OCR text extraction, client-side biometrics, cloud asset management, database design, and machine learning integration working together in a single application.
 
 ---
 
-## 4. Implemented Features
+## 4. Business Value
+The project showcases the following practical benefits:
+*   **Reduces Manual Input:** Automatically extracts data fields from documents via OCR, minimizing manual data entry errors.
+*   **Faster Discrepancy Checks:** Helps reviewers identify name or date of birth mismatches between PAN and Aadhaar documents faster.
+*   **Centralized Verification:** Combines document inspection, selfie verification, and audit trail retrieval in a single reviewer dashboard.
+*   **Improved Efficiency:** Filters low-risk applicants and routes borderline cases to the manual review queue.
+*   **Audit Readiness:** Maintains a detailed, immutable log of all verification and administrative actions.
+*   **Guided Review Decisions:** Displays risk probability scores to assist administrators during the manual decision-making process.
+
+---
+
+## 5. Implemented Features
 The application includes the following completed features:
 *   **User Registration & Authentication:** Standard user signup and login with secure session handling.
 *   **Email OTP Verification:** Validates user identity during signup using a 6-digit One-Time Password (OTP) sent via email (Nodemailer SMTP).
@@ -511,14 +521,7 @@ Start the services in separate terminal windows:
 
 ---
 
-## 22. Future Enhancements
-*   **WebSocket Updates:** Pushing real-time status updates to the client dashboard instead of polling.
-*   **Layout Quality Check:** Verify document aspect ratios and brightness client-side before starting uploads.
-*   **Better OCR Validation:** Give clearer advice to users when document text extraction is unreadable.
-
----
-
-## 23. Conclusion
+## 22. Conclusion
 Veritas eKYC is a practical demonstration of integrating different components of a modern web stack: REST APIs, client-side biometrics, cloud-based storage, and simple machine learning models. 
 
 By building this project, I gained experience in structured full-stack architectures, handling asynchronous file upload streams, running browser-based model inference, and implementing audit security protocols. It serves as an honest, functional portfolio project demonstrating the fundamentals of software engineering, system integration, and security controls.
