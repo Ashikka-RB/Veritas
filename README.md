@@ -2,7 +2,7 @@
 <p align="center"><strong>A Full-Stack Onboarding and Identity Verification Simulation</strong></p>
 
 <p align="center">
-  <img src="frontend/public/assets/dashboard_preview.png" alt="Veritas eKYC Dashboard Preview" width="850"/>
+  <img src="frontend/public/assets/dashboard_preview.png" alt="Veritas eKYC Dashboard Preview" width="550"/>
 </p>
 
 <p align="center">
@@ -65,6 +65,22 @@ The application includes the following completed features:
 *   **Audit Logs:** Keeps a history of user and administrator actions (logins, uploads, status updates) with metadata like IP addresses and user agents.
 *   **KYC Status Tracking:** Tracks applicant onboarding progress across steps (Pending, Under Review, Approved, Rejected).
 *   **Random Forest Risk Classifier:** A Flask microservice running a Scikit-Learn Random Forest model that predicts a KYC recommendation (Approved, Manual Review, Rejected).
+
+---
+
+## 5a. Screenshots & Previews
+
+<p align="center">
+  <strong>Main Dashboard & Admin Queue View</strong><br/>
+  <img src="frontend/public/assets/dashboard_preview.png" alt="Veritas eKYC Dashboard Preview" width="550"/>
+</p>
+
+<p align="center">
+  <strong>Sample Verification Documents (Aadhaar & PAN)</strong><br/>
+  <img src="frontend/public/assets/aadhaar.png" alt="Aadhaar Card Preview" width="270"/>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="frontend/public/assets/pan.png" alt="PAN Card Preview" width="270"/>
+</p>
 
 ---
 
@@ -449,11 +465,10 @@ npm install
 ### Python Virtual Environment & ML Dependencies
 ```bash
 cd ../ml
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
-*(If `requirements.txt` is missing, run: `pip install flask scikit-learn pandas joblib`)*
 
 ---
 
@@ -494,7 +509,7 @@ npm run seed-admin
 Generate the synthetic dataset and train the Random Forest model:
 ```bash
 cd ../ml
-source venv/bin/activate
+source .venv/bin/activate
 python generate_data.py
 python train_model.py
 ```
@@ -506,7 +521,7 @@ Start the services in separate terminal windows:
 *   **Start Flask service:**
     ```bash
     cd ml
-    source venv/bin/activate
+    source .venv/bin/activate
     python app.py
     ```
     *(Runs on `http://127.0.0.1:5001`)*
