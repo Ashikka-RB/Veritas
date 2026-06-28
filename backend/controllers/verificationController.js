@@ -6,7 +6,7 @@ const { logSecurityEvent } = require("../utils/auditLogger");
 const analyzeVerification = async (req, res) => {
   try {
     const response = await axios.post(
-      "http://127.0.0.1:5001/predict",
+      "https://veritas-ml.onrender.com/predict",
       req.body
     );
 
