@@ -68,22 +68,6 @@ The application includes the following completed features:
 
 ---
 
-## 5a. Screenshots & Previews
-
-<p align="center">
-  <strong>Main Dashboard & Admin Queue View</strong><br/>
-  <img src="frontend/public/assets/dashboard_preview.png" alt="Veritas eKYC Dashboard Preview" width="550"/>
-</p>
-
-<p align="center">
-  <strong>Sample Verification Documents (Aadhaar & PAN)</strong><br/>
-  <img src="frontend/public/assets/aadhaar.png" alt="Aadhaar Card Preview" width="270"/>
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="frontend/public/assets/pan.png" alt="PAN Card Preview" width="270"/>
-</p>
-
----
-
 ## 6. Complete Verification Workflow
 
 ```mermaid
