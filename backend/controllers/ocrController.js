@@ -1,6 +1,7 @@
 const Tesseract = require("tesseract.js");
 const User = require("../models/User");
 const { logSecurityEvent } = require("../utils/auditLogger");
+const { encrypt } = require("../utils/cryptoHelper");
 
 
 const extractAadhaarData = async (req, res) => {
@@ -118,6 +119,14 @@ const upperLine =
     const userId =
   req.user.id;
 
+let aadhaarLast4 = null;
+let aadhaarEncrypted = null;
+if (aadhaarNumber !== "Not Found") {
+  const cleanNumber = aadhaarNumber.replace(/\s/g, "");
+  aadhaarLast4 = cleanNumber.slice(-4);
+  aadhaarEncrypted = encrypt(aadhaarNumber);
+}
+
 await User.findByIdAndUpdate(
 
   userId,
@@ -130,8 +139,11 @@ await User.findByIdAndUpdate(
 
     aadhaarGender: gender,
 
-    aadhaarNumber:
-      aadhaarNumber,
+    aadhaarEncrypted,
+
+    aadhaarLast4,
+
+    $unset: { aadhaarNumber: 1 },
 
     ocrConfidence: confidence,
 
@@ -268,12 +280,22 @@ for (let i = 0; i < lines.length; i++) {
 const confidence = result.data.confidence ? Math.round(result.data.confidence) : null;
 const userId =
   req.user.id;
+let panLast4 = null;
+let panEncrypted = null;
+if (panNumber !== "Not Found") {
+  const cleanNumber = panNumber.trim();
+  panLast4 = cleanNumber.slice(-4);
+  panEncrypted = encrypt(panNumber);
+}
+
 await User.findByIdAndUpdate(
   userId,
   {
     panName: name,
     panDOB: dob,
-    panNumber: panNumber,
+    panEncrypted,
+    panLast4,
+    $unset: { panNumber: 1 },
     ocrConfidence: confidence
   }
 );

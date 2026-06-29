@@ -91,8 +91,29 @@ async (req, res) => {
         adminDecision:
           "PENDING"
       }).populate("userId");
-    console.log("BACKEND RETRIEVED REVIEW QUEUE:", records);
-    res.json(records);
+    
+    const sanitizedRecords = records.map(record => {
+      const recordObj = record.toObject({ getters: true });
+      if (recordObj.userId) {
+        const userObj = recordObj.userId;
+        if (!userObj.aadhaarLast4 && userObj.aadhaarNumber) {
+          const cleanAadhaar = userObj.aadhaarNumber.replace(/\s/g, "");
+          userObj.aadhaarLast4 = cleanAadhaar.slice(-4);
+        }
+        if (!userObj.panLast4 && userObj.panNumber) {
+          userObj.panLast4 = userObj.panNumber.trim().slice(-4);
+        }
+        delete userObj.password;
+        delete userObj.aadhaarNumber;
+        delete userObj.panNumber;
+        delete userObj.aadhaarEncrypted;
+        delete userObj.panEncrypted;
+      }
+      return recordObj;
+    });
+
+    console.log("BACKEND RETRIEVED REVIEW QUEUE:", sanitizedRecords);
+    res.json(sanitizedRecords);
 
   } catch (error) {
 
@@ -126,8 +147,23 @@ async (req, res) => {
 
     let userDoc = null;
     if (record.userId) {
-      userDoc = await User.findById(record.userId).select("-password");
-      console.log("BACKEND LOOKED UP USER DOCUMENT:", userDoc);
+      const fetchedUser = await User.findById(record.userId).select("-password");
+      console.log("BACKEND LOOKED UP USER DOCUMENT:", fetchedUser);
+      if (fetchedUser) {
+        const userObj = fetchedUser.toObject({ getters: true });
+        if (!userObj.aadhaarLast4 && userObj.aadhaarNumber) {
+          const cleanAadhaar = userObj.aadhaarNumber.replace(/\s/g, "");
+          userObj.aadhaarLast4 = cleanAadhaar.slice(-4);
+        }
+        if (!userObj.panLast4 && userObj.panNumber) {
+          userObj.panLast4 = userObj.panNumber.trim().slice(-4);
+        }
+        delete userObj.aadhaarNumber;
+        delete userObj.panNumber;
+        delete userObj.aadhaarEncrypted;
+        delete userObj.panEncrypted;
+        userDoc = userObj;
+      }
     } else {
       console.log("BACKEND: NO userId ON QUEUE RECORD TO LOOK UP USER!");
     }

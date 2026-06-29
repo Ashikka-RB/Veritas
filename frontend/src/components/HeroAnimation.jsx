@@ -42,40 +42,56 @@ export default function HeroAnimation() {
     };
 
     const ctx = gsap.context(() => {
-      // Setup initial states (visible immediately without scrolling)
-      gsap.set(aadhaarRef.current, { y: 0, opacity: 1, rotationX: 0, rotationY: 0, rotationZ: 0 });
-      gsap.set(panRef.current, { y: 60, opacity: 0, rotationX: 10, rotationY: -15, rotationZ: -2 });
-      
-      // Glass starts in position over the Aadhaar card
-      gsap.set(glassGsapRef.current, { x: -200, y: 10, rotationZ: -5, rotationY: -10 });
-      
-      gsap.ticker.add(updateMask);
+      const mm = gsap.matchMedia();
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: document.querySelector('.hero-pin-container'),
-          start: 'top top',
-          end: '+=400%', // Scrubs over 4x viewport height
-          scrub: 1,
-          pin: true,
-          anticipatePin: 1
-        }
+      // Desktop layout (>= 1024px)
+      mm.add("(min-width: 1024px)", () => {
+        // Setup initial states (visible immediately without scrolling)
+        gsap.set(aadhaarRef.current, { y: 0, opacity: 1, rotationX: 0, rotationY: 0, rotationZ: 0 });
+        gsap.set(panRef.current, { y: 60, opacity: 0, rotationX: 10, rotationY: -15, rotationZ: -2 });
+        
+        // Glass starts in position over the Aadhaar card
+        gsap.set(glassGsapRef.current, { x: -200, y: 10, rotationZ: -5, rotationY: -10, display: "block" });
+        
+        gsap.ticker.add(updateMask);
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: document.querySelector('.hero-pin-container'),
+            start: 'top top',
+            end: '+=400%', // Scrubs over 4x viewport height
+            scrub: 1,
+            pin: true,
+            anticipatePin: 1
+          }
+        });
+
+        // Phase 1: Scanning Aadhaar
+        tl.to(glassGsapRef.current, { x: 300, y: 30, rotationZ: 10, rotationY: 15, duration: 4, ease: "power1.inOut" }, 0);
+        
+        // Phase 2: Transition (Aadhaar out, PAN in, Glass loops back elegantly)
+        tl.to(aadhaarRef.current, { y: -60, opacity: 0, rotationX: 15, duration: 3, ease: "power2.inOut" }, 4)
+          .to(panRef.current, { y: 0, opacity: 1, rotationX: 0, rotationY: 0, rotationZ: 0, duration: 3, ease: "power2.inOut" }, 4.5)
+          .to(glassGsapRef.current, { x: -200, y: 40, rotationZ: -10, rotationY: -15, duration: 3.5, ease: "sine.inOut" }, 4);
+
+        // Phase 3: Scanning PAN
+        tl.to(glassGsapRef.current, { x: 280, y: -20, rotationZ: 5, rotationX: 10, duration: 4, ease: "power1.inOut" }, 7.5);
+
+        // Phase 4: End animation - Both cards fade elegantly into the next section
+        tl.to(glassGsapRef.current, { opacity: 0, y: -50, duration: 2, ease: "power2.inOut" }, 11.5)
+          .to(panRef.current, { opacity: 0, y: -50, duration: 2, ease: "power2.inOut" }, 11.5);
+
+        return () => {
+          gsap.ticker.remove(updateMask);
+        };
       });
 
-      // Phase 1: Scanning Aadhaar
-      tl.to(glassGsapRef.current, { x: 300, y: 30, rotationZ: 10, rotationY: 15, duration: 4, ease: "power1.inOut" }, 0);
-      
-      // Phase 2: Transition (Aadhaar out, PAN in, Glass loops back elegantly)
-      tl.to(aadhaarRef.current, { y: -60, opacity: 0, rotationX: 15, duration: 3, ease: "power2.inOut" }, 4)
-        .to(panRef.current, { y: 0, opacity: 1, rotationX: 0, rotationY: 0, rotationZ: 0, duration: 3, ease: "power2.inOut" }, 4.5)
-        .to(glassGsapRef.current, { x: -200, y: 40, rotationZ: -10, rotationY: -15, duration: 3.5, ease: "sine.inOut" }, 4);
-
-      // Phase 3: Scanning PAN
-      tl.to(glassGsapRef.current, { x: 280, y: -20, rotationZ: 5, rotationX: 10, duration: 4, ease: "power1.inOut" }, 7.5);
-
-      // Phase 4: End animation - Both cards fade elegantly into the next section
-      tl.to(glassGsapRef.current, { opacity: 0, y: -50, duration: 2, ease: "power2.inOut" }, 11.5)
-        .to(panRef.current, { opacity: 0, y: -50, duration: 2, ease: "power2.inOut" }, 11.5);
+      // Tablet and Mobile layout (< 1024px)
+      mm.add("(max-width: 1023px)", () => {
+        gsap.set(aadhaarRef.current, { clearProps: "all" });
+        gsap.set(panRef.current, { clearProps: "all" });
+        gsap.set(glassGsapRef.current, { display: "none" });
+      });
 
     }, containerRef);
     return () => {

@@ -96,7 +96,7 @@ export default function Landing() {
             </div>
             
             {/* 4. Staggered glowing stats */}
-            <div style={{ display: 'flex', gap: '32px', marginTop: '48px' }}>
+            <div className="hero-stats" style={{ display: 'flex', gap: '32px', marginTop: '48px' }}>
               <motion.div variants={glowUpDelayed(1.4)} initial="hidden" animate="visible">
                 <div style={{ fontFamily: 'var(--display)', fontSize: '28px', color: 'var(--gold)' }}>99.2%</div>
                 <div style={{ fontSize: '12px', color: 'var(--text3)' }}>OCR Accuracy</div>

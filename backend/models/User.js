@@ -78,7 +78,26 @@ aadhaarGender: {
 },
 
 aadhaarNumber: {
-  type: String
+  type: String,
+  get: function(v) {
+    if (this.aadhaarEncrypted) {
+      try {
+        const { decrypt } = require("../utils/cryptoHelper");
+        return decrypt(this.aadhaarEncrypted);
+      } catch (err) {
+        console.error("Decryption failed:", err.message);
+      }
+    }
+    return v;
+  }
+},
+aadhaarEncrypted: {
+  type: String,
+  default: null
+},
+aadhaarLast4: {
+  type: String,
+  default: null
 },
 
 panName: {
@@ -89,8 +108,27 @@ panDOB: {
   type: String
 },
 
-  panNumber: {
-  type: String
+panNumber: {
+  type: String,
+  get: function(v) {
+    if (this.panEncrypted) {
+      try {
+        const { decrypt } = require("../utils/cryptoHelper");
+        return decrypt(this.panEncrypted);
+      } catch (err) {
+        console.error("Decryption failed:", err.message);
+      }
+    }
+    return v;
+  }
+},
+panEncrypted: {
+  type: String,
+  default: null
+},
+panLast4: {
+  type: String,
+  default: null
 },
   isLocked: {
     type: Boolean,
@@ -137,6 +175,9 @@ panDOB: {
     type: String,
     default: null
   },
+}, {
+  toJSON: { getters: true },
+  toObject: { getters: true }
 });
 
 

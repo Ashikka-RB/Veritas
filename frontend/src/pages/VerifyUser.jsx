@@ -276,13 +276,13 @@ export default function VerifyUser() {
                 <div className="ocr-field-row" style={{ padding: '10px 14px' }}>
                   <span className="ocr-key">Aadhaar</span>
                   <span className="ocr-val" style={{ fontSize: '12px' }}>
-                    {maskAadhaar(dbUser?.aadhaarNumber)}
+                    {dbUser?.aadhaarLast4 ? `XXXX XXXX ${dbUser.aadhaarLast4}` : maskAadhaar(dbUser?.aadhaarNumber)}
                   </span>
                 </div>
                 <div className="ocr-field-row" style={{ padding: '10px 14px' }}>
                   <span className="ocr-key">PAN</span>
                   <span className="ocr-val" style={{ fontSize: '12px' }}>
-                    {maskPan(dbUser?.panNumber)}
+                    {dbUser?.panLast4 ? `******${dbUser.panLast4}` : maskPan(dbUser?.panNumber)}
                   </span>
                 </div>
                 <div className="ocr-field-row" style={{ padding: '10px 14px' }}>
