@@ -24,7 +24,7 @@ export default function Register() {
     setLoading(true);
 
     const response = await axios.post(
-      "https://veritas-backend-3nfm.onrender.com/api/auth/register",
+      `${import.meta.env.VITE_API_URL}/api/auth/register`,
       {
         fullName,
         email,

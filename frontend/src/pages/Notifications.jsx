@@ -18,7 +18,7 @@ export default function Notifications() {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        const res = await fetch("https://veritas-backend-3nfm.onrender.com/api/notifications", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 

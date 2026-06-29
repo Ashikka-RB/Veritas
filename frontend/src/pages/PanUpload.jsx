@@ -23,7 +23,7 @@ export default function PanUpload() {
         const response =
           await fetch(
 
-            "https://veritas-backend-3nfm.onrender.com/api/auth/profile",
+            `${import.meta.env.VITE_API_URL}/api/auth/profile`,
 
             {
 
@@ -75,7 +75,7 @@ const handlePanUpload =
 
       // upload PAN
       const uploadResponse = await fetch(
-        "https://veritas-backend-3nfm.onrender.com/api/upload/pan",
+        `${import.meta.env.VITE_API_URL}/api/upload/pan`,
         {
           method: "POST",
           headers: {
@@ -92,7 +92,7 @@ const handlePanUpload =
 
       // OCR request
       const ocrResponse = await fetch(
-        "https://veritas-backend-3nfm.onrender.com/api/ocr/pan",
+        `${import.meta.env.VITE_API_URL}/api/ocr/pan`,
         {
           method: "POST",
           headers: {

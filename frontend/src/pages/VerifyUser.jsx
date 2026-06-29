@@ -8,7 +8,7 @@ const getImageUrl = (path) => {
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
-  return `https://veritas-backend-3nfm.onrender.com/${path}`;
+  return `${import.meta.env.VITE_API_URL}/${path}`;
 };
 
 export default function VerifyUser() {
@@ -20,7 +20,7 @@ export default function VerifyUser() {
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
-    fetch(`https://veritas-backend-3nfm.onrender.com/api/admin/review-item/${id}`, {
+    fetch(`${import.meta.env.VITE_API_URL}/api/admin/review-item/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -54,7 +54,7 @@ export default function VerifyUser() {
     if (!queue?._id) return;
     try {
       const token = localStorage.getItem('adminToken');
-      await fetch(`https://veritas-backend-3nfm.onrender.com/api/admin/approve/${queue._id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/admin/approve/${queue._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export default function VerifyUser() {
     }
     try {
       const token = localStorage.getItem('adminToken');
-      await fetch(`https://veritas-backend-3nfm.onrender.com/api/admin/reject/${queue._id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/admin/reject/${queue._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ export default function VerifyUser() {
     }
     try {
       const token = localStorage.getItem('adminToken');
-      await fetch(`https://veritas-backend-3nfm.onrender.com/api/admin/reupload/${queue._id}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/admin/reupload/${queue._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -56,7 +56,7 @@ export default function Otp() {
 
     try {
       setLoading(true);
-      const res = await fetch("https://veritas-backend-3nfm.onrender.com/api/auth/verify-otp", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/verify-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -84,7 +84,7 @@ export default function Otp() {
     if (!canResend) return;
 
     try {
-      const res = await fetch("https://veritas-backend-3nfm.onrender.com/api/auth/send-otp", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

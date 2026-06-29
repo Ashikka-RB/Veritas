@@ -7,7 +7,7 @@ const getImageUrl = (path) => {
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
-  return `https://veritas-backend-3nfm.onrender.com/${path}`;
+  return `${import.meta.env.VITE_API_URL}/${path}`;
 };
 
 export default function Status() {
@@ -32,8 +32,8 @@ export default function Status() {
       };
 
       const [resStatus, resNotif] = await Promise.all([
-        fetch('https://veritas-backend-3nfm.onrender.com/api/kyc/status', { headers }),
-        fetch('https://veritas-backend-3nfm.onrender.com/api/notifications', { headers })
+        fetch(`${import.meta.env.VITE_API_URL}/api/kyc/status`, { headers }),
+        fetch(`${import.meta.env.VITE_API_URL}/api/notifications`, { headers })
       ]);
 
       if (resStatus.status === 401 || resNotif.status === 401) {

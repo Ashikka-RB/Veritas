@@ -21,7 +21,7 @@ export default function AadhaarUpload() {
     formData.append("aadhaar", selectedFile);
 
     const response = await fetch(
-      "https://veritas-backend-3nfm.onrender.com/api/upload/aadhaar",
+      `${import.meta.env.VITE_API_URL}/api/upload/aadhaar`,
       {
         method: "POST",
         headers: {
@@ -51,7 +51,7 @@ export default function AadhaarUpload() {
 
 const ocrResponse =
   await fetch(
-    "https://veritas-backend-3nfm.onrender.com/api/ocr/aadhaar",
+    `${import.meta.env.VITE_API_URL}/api/ocr/aadhaar`,
     {
       method: "POST",
       headers: {

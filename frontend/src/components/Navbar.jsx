@@ -19,7 +19,7 @@ export default function Navbar({ type = "public", stepText, backTo }) {
     const token = localStorage.getItem("token");
     if (!token) return;
 
-    fetch("https://veritas-backend-3nfm.onrender.com/api/dashboard", {
+    fetch(`${import.meta.env.VITE_API_URL}/api/dashboard`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -35,7 +35,7 @@ export default function Navbar({ type = "public", stepText, backTo }) {
     const token = localStorage.getItem("token");
     if (token) {
       try {
-        await fetch("https://veritas-backend-3nfm.onrender.com/api/auth/logout", {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}` }
         });

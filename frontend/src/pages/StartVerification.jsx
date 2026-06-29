@@ -24,7 +24,7 @@ export default function StartVerification() {
     }
 
     try {
-      const response = await fetch('https://veritas-backend-3nfm.onrender.com/api/kyc/process', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/kyc/process`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

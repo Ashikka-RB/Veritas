@@ -15,7 +15,7 @@ export default function Login() {
     setLoading(true);
 
     const response = await fetch(
-      "https://veritas-backend-3nfm.onrender.com/api/auth/login",
+      `${import.meta.env.VITE_API_URL}/api/auth/login`,
       {
         method: "POST",
         headers: {

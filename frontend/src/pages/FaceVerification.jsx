@@ -47,7 +47,7 @@ export default function FaceVerification() {
       formData.append('face', file);
       formData.append('faceMatchScore', score);
 
-      const response = await fetch('https://veritas-backend-3nfm.onrender.com/api/verification/face', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/verification/face`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -172,7 +172,7 @@ useEffect(() => {
 
         const res =
           await fetch(
-            "https://veritas-backend-3nfm.onrender.com/api/auth/profile",
+            `${import.meta.env.VITE_API_URL}/api/auth/profile`,
             {
               headers: {
                 Authorization:
@@ -199,7 +199,7 @@ useEffect(() => {
 
           const imageUrl = data.aadhaarFile.startsWith('http://') || data.aadhaarFile.startsWith('https://')
             ? data.aadhaarFile
-            : `https://veritas-backend-3nfm.onrender.com/${data.aadhaarFile}`;
+            : `${import.meta.env.VITE_API_URL}/${data.aadhaarFile}`;
 
           console.log(
             "AADHAAR URL:",

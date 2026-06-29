@@ -21,10 +21,10 @@ export default function Dashboard() {
       try {
         setLoading(true);
         const [dashRes, timelineRes] = await Promise.all([
-          fetch("https://veritas-backend-3nfm.onrender.com/api/dashboard", {
+          fetch(`${import.meta.env.VITE_API_URL}/api/dashboard`, {
             headers: { Authorization: `Bearer ${token}` }
           }),
-          fetch("https://veritas-backend-3nfm.onrender.com/api/verification-timeline", {
+          fetch(`${import.meta.env.VITE_API_URL}/api/verification-timeline`, {
             headers: { Authorization: `Bearer ${token}` }
           })
         ]);

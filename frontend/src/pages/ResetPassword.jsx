@@ -35,7 +35,7 @@ export default function ResetPassword() {
       setLoading(true);
       setError('');
 
-      const response = await fetch('https://veritas-backend-3nfm.onrender.com/api/auth/reset-password', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
