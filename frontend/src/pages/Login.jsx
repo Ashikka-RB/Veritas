@@ -15,7 +15,7 @@ export default function Login() {
     setLoading(true);
 
     const response = await fetch(
-      "http://localhost:8000/api/auth/login",
+      "https://veritas-backend-3nfm.onrender.com/api/auth/login",
       {
         method: "POST",
         headers: {

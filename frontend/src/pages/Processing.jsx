@@ -60,7 +60,7 @@ async (score, profile) => {
     const token = localStorage.getItem("token");
     const response =
       await fetch(
-        "http://localhost:8000/api/verification/analyze",
+        "https://veritas-backend-3nfm.onrender.com/api/verification/analyze",
         {
           method: "POST",
 
@@ -132,7 +132,7 @@ async (
     const token = localStorage.getItem("token");
 
     if (token) {
-      const res = await fetch("http://localhost:8000/api/auth/profile", {
+      const res = await fetch("https://veritas-backend-3nfm.onrender.com/api/auth/profile", {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -164,7 +164,7 @@ async (
     console.log("REQUEST BODY SENT TO /api/admin/submit:", payload);
 
     await fetch(
-      "http://localhost:8000/api/admin/submit",
+      "https://veritas-backend-3nfm.onrender.com/api/admin/submit",
       {
         method: "POST",
 
@@ -198,7 +198,7 @@ useEffect(() => {
       try {
         const token = localStorage.getItem("token");
         if (token) {
-          const res = await fetch("http://localhost:8000/api/auth/profile", {
+          const res = await fetch("https://veritas-backend-3nfm.onrender.com/api/auth/profile", {
             headers: {
               Authorization: `Bearer ${token}`
             }

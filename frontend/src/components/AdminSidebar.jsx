@@ -9,7 +9,7 @@ export default function AdminSidebar() {
 
   const handleVerifyUsersClick = () => {
     const token = localStorage.getItem('adminToken');
-    fetch('http://localhost:8000/api/admin/review-queue', {
+    fetch('https://veritas-backend-3nfm.onrender.com/api/admin/review-queue', {
       headers: {
         'Authorization': `Bearer ${token}`
       }

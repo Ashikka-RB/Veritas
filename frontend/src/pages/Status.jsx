@@ -7,7 +7,7 @@ const getImageUrl = (path) => {
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
-  return `http://localhost:8000/${path}`;
+  return `https://veritas-backend-3nfm.onrender.com/${path}`;
 };
 
 export default function Status() {
@@ -32,8 +32,8 @@ export default function Status() {
       };
 
       const [resStatus, resNotif] = await Promise.all([
-        fetch('http://localhost:8000/api/kyc/status', { headers }),
-        fetch('http://localhost:8000/api/notifications', { headers })
+        fetch('https://veritas-backend-3nfm.onrender.com/api/kyc/status', { headers }),
+        fetch('https://veritas-backend-3nfm.onrender.com/api/notifications', { headers })
       ]);
 
       if (resStatus.status === 401 || resNotif.status === 401) {

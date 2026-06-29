@@ -20,7 +20,7 @@ export default function AdminLogin() {
       setLoading(true);
       setError('');
 
-      const response = await fetch('http://localhost:8000/api/admin/login', {
+      const response = await fetch('https://veritas-backend-3nfm.onrender.com/api/admin/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

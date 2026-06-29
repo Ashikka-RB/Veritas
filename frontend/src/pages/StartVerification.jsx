@@ -24,7 +24,7 @@ export default function StartVerification() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/kyc/process', {
+      const response = await fetch('https://veritas-backend-3nfm.onrender.com/api/kyc/process', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

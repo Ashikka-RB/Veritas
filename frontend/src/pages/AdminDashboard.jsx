@@ -17,10 +17,10 @@ export default function AdminDashboard() {
       const token = localStorage.getItem('adminToken');
       const headers = { 'Authorization': `Bearer ${token}` };
       const [resMetrics, resWeekly, resFraud, resQueue] = await Promise.all([
-        fetch('http://localhost:8000/api/admin/analytics/metrics', { headers }),
-        fetch('http://localhost:8000/api/admin/analytics/weekly-verifications', { headers }),
-        fetch('http://localhost:8000/api/admin/analytics/fraud-distribution', { headers }),
-        fetch('http://localhost:8000/api/admin/review-queue', { headers })
+        fetch('https://veritas-backend-3nfm.onrender.com/api/admin/analytics/metrics', { headers }),
+        fetch('https://veritas-backend-3nfm.onrender.com/api/admin/analytics/weekly-verifications', { headers }),
+        fetch('https://veritas-backend-3nfm.onrender.com/api/admin/analytics/fraud-distribution', { headers }),
+        fetch('https://veritas-backend-3nfm.onrender.com/api/admin/review-queue', { headers })
       ]);
 
       if (!resMetrics.ok || !resWeekly.ok || !resFraud.ok || !resQueue.ok) {
@@ -58,7 +58,7 @@ export default function AdminDashboard() {
     if (!window.confirm('Are you sure you want to approve this user?')) return;
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:8000/api/admin/approve/${id}`, {
+      const res = await fetch(`https://veritas-backend-3nfm.onrender.com/api/admin/approve/${id}`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export default function AdminDashboard() {
     }
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:8000/api/admin/reject/${id}`, {
+      const res = await fetch(`https://veritas-backend-3nfm.onrender.com/api/admin/reject/${id}`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ export default function AdminDashboard() {
     if (reason === null) return; // Cancelled
     try {
       const token = localStorage.getItem('adminToken');
-      const res = await fetch(`http://localhost:8000/api/admin/flag-fraud/${id}`, {
+      const res = await fetch(`https://veritas-backend-3nfm.onrender.com/api/admin/flag-fraud/${id}`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

@@ -474,7 +474,7 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ### Frontend Environment Configuration (`frontend/.env`)
 Create a `.env` file inside the `frontend` folder:
 ```env
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=https://veritas-backend-3nfm.onrender.com
 ```
 
 ---
@@ -515,7 +515,7 @@ Start the services in separate terminal windows:
     cd backend
     npm run dev
     ```
-    *(Runs on `http://localhost:8000`)*
+    *(Runs on `https://veritas-backend-3nfm.onrender.com`)*
 
 *   **Start Frontend dev server:**
     ```bash

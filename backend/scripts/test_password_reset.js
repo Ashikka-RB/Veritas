@@ -32,7 +32,7 @@ async function run() {
 
     // Verify initial login succeeds with old password
     console.log("Verifying initial login with old password...");
-    const loginOldRes = await axios.post("http://localhost:8000/api/auth/login", {
+    const loginOldRes = await axios.post("https://veritas-backend-3nfm.onrender.com/api/auth/login", {
       email,
       password: oldPassword
     });
@@ -41,7 +41,7 @@ async function run() {
 
     // 3. Request Forgot Password
     console.log("\n--- Triggering Forgot Password ---");
-    const forgotRes = await axios.post("http://localhost:8000/api/auth/forgot-password", { email });
+    const forgotRes = await axios.post("https://veritas-backend-3nfm.onrender.com/api/auth/forgot-password", { email });
     console.log("Forgot Password response status (expected 200):", forgotRes.status);
     console.log("Forgot Password response message:", forgotRes.data.message);
 
@@ -59,7 +59,7 @@ async function run() {
 
     // 5. Trigger Reset Password
     console.log("\n--- Triggering Reset Password with Token ---");
-    const resetRes = await axios.post("http://localhost:8000/api/auth/reset-password", {
+    const resetRes = await axios.post("https://veritas-backend-3nfm.onrender.com/api/auth/reset-password", {
       token,
       newPassword
     });
@@ -73,7 +73,7 @@ async function run() {
 
     // 7. Verify login with NEW password succeeds
     console.log("\n--- Verifying login with NEW password ---");
-    const loginNewRes = await axios.post("http://localhost:8000/api/auth/login", {
+    const loginNewRes = await axios.post("https://veritas-backend-3nfm.onrender.com/api/auth/login", {
       email,
       password: newPassword
     });
@@ -83,7 +83,7 @@ async function run() {
     // 8. Verify login with OLD password fails
     console.log("\n--- Verifying login with OLD password fails ---");
     try {
-      await axios.post("http://localhost:8000/api/auth/login", {
+      await axios.post("https://veritas-backend-3nfm.onrender.com/api/auth/login", {
         email,
         password: oldPassword
       });

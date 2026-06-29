@@ -9,7 +9,7 @@ export default function FraudMonitor() {
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
-    fetch('http://localhost:8000/api/admin/review-queue', {
+    fetch('https://veritas-backend-3nfm.onrender.com/api/admin/review-queue', {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -33,7 +33,7 @@ export default function FraudMonitor() {
   const handleBlock = async (id) => {
     try {
       const token = localStorage.getItem('adminToken');
-      await fetch(`http://localhost:8000/api/admin/reject/${id}`, {
+      await fetch(`https://veritas-backend-3nfm.onrender.com/api/admin/reject/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

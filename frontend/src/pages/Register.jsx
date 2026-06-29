@@ -24,7 +24,7 @@ export default function Register() {
     setLoading(true);
 
     const response = await axios.post(
-      "http://localhost:8000/api/auth/register",
+      "https://veritas-backend-3nfm.onrender.com/api/auth/register",
       {
         fullName,
         email,

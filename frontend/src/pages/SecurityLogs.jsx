@@ -16,7 +16,7 @@ export default function SecurityLogs() {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/security/logs', {
+      const response = await fetch('https://veritas-backend-3nfm.onrender.com/api/security/logs', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
