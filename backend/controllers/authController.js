@@ -1,17 +1,36 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const SibApiV3Sdk = require("@getbrevo/brevo");
+const axios = require("axios");
 const crypto = require("crypto");
 const { logSecurityEvent, registerDevice } = require("../utils/auditLogger");
 
 // Nodemailer Transporter Configuration
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-apiInstance.setApiKey(
-  SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey,
-  process.env.BREVO_API_KEY
-);
+const sendEmail = async (to, subject, textContent) => {
+  return await axios.post(
+    "https://api.brevo.com/v3/smtp/email",
+    {
+      sender: {
+        name: "Veritas eKYC",
+        email: process.env.EMAIL_SENDER,
+      },
+      to: [
+        {
+          email: to,
+        },
+      ],
+      subject,
+      textContent,
+    },
+    {
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
 
 const registerUser = async (req, res) => {
   try {
@@ -54,19 +73,11 @@ const registerUser = async (req, res) => {
     // Send OTP email via Nodemailer
     if (process.env.BREVO_API_KEY) {
       try {
-        await apiInstance.sendTransacEmail({
-  sender: {
-    name: "Veritas eKYC",
-    email: process.env.EMAIL_SENDER,
-  },
-  to: [
-    {
-      email: email,
-    },
-  ],
-  subject: "Veritas eKYC Verification Code",
-  textContent: `Your eKYC verification code is: ${otp}. It will expire in 10 minutes.`,
-});
+        await sendEmail(
+        email,
+        "Veritas eKYC Verification Code",
+        `Your eKYC verification code is: ${otp}. It will expire in 10 minutes.`
+      );
       } catch (emailError) {
         console.log("EMAIL ERROR DURING REGISTRATION:", emailError);
         // Rollback user creation to let them retry
@@ -181,19 +192,11 @@ const sendOtp = async (req, res) => {
     await user.save();
 
     if (process.env.BREVO_API_KEY) {
-      await apiInstance.sendTransacEmail({
-  sender: {
-    name: "Veritas eKYC",
-    email: process.env.EMAIL_SENDER,
-  },
-  to: [
-    {
-      email: email,
-    },
-  ],
-  subject: "Veritas eKYC Verification Code",
-  textContent: `Your new eKYC verification code is: ${otp}. It will expire in 10 minutes.`,
-});
+      await sendEmail(
+      email,
+      "Veritas eKYC Verification Code",
+      `Your new eKYC verification code is: ${otp}. It will expire in 10 minutes.`
+    );
     } else {
       console.log("WARNING: BREVO_API_KEY is not configured");
       console.log(`[MOCK EMAIL RESEND] OTP generated for ${email}: ${otp}`);
@@ -305,19 +308,11 @@ const forgotPassword = async (req, res) => {
     
     if (process.env.BREVO_API_KEY) {
       try {
-        await apiInstance.sendTransacEmail({
-  sender: {
-    name: "Veritas eKYC",
-    email: process.env.EMAIL_SENDER,
-  },
-  to: [
-    {
-      email: email,
-    },
-  ],
-  subject: "Veritas eKYC Password Reset Link",
-  textContent: `You requested a password reset.\n\n${resetUrl}\n\nThis link expires in 15 minutes.`,
-});
+        await sendEmail(
+          email,
+          "Veritas eKYC Password Reset Link",
+          `You requested a password reset.\n\n${resetUrl}\n\nThis link expires in 15 minutes.`
+        );
         console.log(`[forgot-password] Password reset email sent successfully to ${email}`);
       } catch (emailError) {
         console.error(`[forgot-password] Email sending failed:`, emailError);
