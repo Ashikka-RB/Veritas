@@ -12,9 +12,11 @@ cloudinary.config({
 });
 
 console.log("Cloudinary Resolved Config:", {
-  cloud_name: cloudinary.config().cloud_name,
-  api_key: cloudinary.config().api_key ? "CONFIGURED" : "NOT CONFIGURED",
-  api_secret: cloudinary.config().api_secret ? "CONFIGURED" : "NOT CONFIGURED"
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key_first5: process.env.CLOUDINARY_API_KEY?.substring(0, 5),
+  api_key_length: process.env.CLOUDINARY_API_KEY?.length,
+  api_secret_first5: process.env.CLOUDINARY_API_SECRET?.substring(0, 5),
+  api_secret_length: process.env.CLOUDINARY_API_SECRET?.length
 });
 
 module.exports = cloudinary;
