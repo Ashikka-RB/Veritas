@@ -515,7 +515,7 @@ Start the services in separate terminal windows:
     cd backend
     npm run dev
     ```
-    *(Runs on `https://veritas-backend-3nfm.onrender.com`)*
+    *(Runs on `http://localhost:8000`)*
 
 *   **Start Frontend dev server:**
     ```bash
